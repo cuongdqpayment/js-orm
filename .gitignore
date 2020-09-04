@@ -1,0 +1,62 @@
+~*
+*~
+*.sw[mnpcod]
+*.log
+*.tmp
+*.tmp.*
+log.txt
+*.sublime-project
+*.sublime-workspace
+.vscode/
+npm-debug.log*
+
+#ignore log file service
+logs/*.log
+service.pid
+
+.idea/
+.ionic/
+.sourcemaps/
+.sass-cache/
+.tmp/
+.versions/
+coverage/
+dist/
+node_modules/
+tmp/
+cfg/
+#ignore file password
+jwt/
+#khong chuyen file database len vi se bi ghi de mat so lieu
+db/database/
+
+cert/api-certificate.pem
+cert/api-private-key.pem
+
+temp/
+#phai day www len server cho ionic hoat dong
+# www/
+
+#khong day google-key
+# www/index.html
+
+#khong day google-key
+# src/index.html
+
+#khong truyen file upload len hoac xuong
+upload_files/
+#khong truyen file screen_shot_images len
+screen_shot/
+
+platforms/
+plugins/
+plugins/android.json
+plugins/ios.json
+$RECYCLE.BIN/
+
+.DS_Store
+Thumbs.db
+UserInterfaceState.xcuserstate
+#.gitignore
+
+package-lock.json
