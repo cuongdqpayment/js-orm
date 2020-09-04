@@ -12,10 +12,9 @@
  *
  */
 
-const isSilence = false;
-
 class MongoDAO {
-  constructor(uri, dbName) {
+  constructor(uri, dbName, isDebug) {
+    this.isDebug = isDebug;
     this.client = new (require("mongodb").MongoClient)(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

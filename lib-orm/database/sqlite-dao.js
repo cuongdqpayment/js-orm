@@ -22,10 +22,16 @@
  *
  * repaired 20190105: col.value !=undefined && !=null
  */
-const isSilence = true;
+const fs = require('fs');
+const path = require("path");
 
 class SQLiteDAO {
-  constructor(dbFilePath) {
+  constructor(dbFilePath, isDebug) {
+    this.isDebug = isDebug;
+    let pathDb = dbFilePath.substring(0, dbFilePath.lastIndexOf(path.sep))
+    if (!fs.existsSync(pathDb)) {
+      fs.mkdirSync(pathDb, true);
+    }
     this.db = new (require("sqlite3").verbose().Database)(dbFilePath, (err) => {
       if (err) {
         console.log("Could NOT connect to database " + dbFilePath, err);
@@ -442,7 +448,7 @@ class SQLiteDAO {
     return new Promise((resolve, reject) => {
       this.db.get(sql, params, (err, row) => {
         if (err) {
-          if (!isSilence) console.log("Could NOT excute: ", sql, params);
+          if (!this.isDebug) console.log("Could NOT excute: ", sql, params);
           reject(err);
         } else {
           resolve(row || {});
@@ -460,7 +466,7 @@ class SQLiteDAO {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, result) => {
         if (err) {
-          if (!isSilence) console.log("Could NOT excute: ", sql, params);
+          if (!this.isDebug) console.log("Could NOT excute: ", sql, params);
           reject(err);
         } else {
           resolve(result || []);
@@ -483,7 +489,7 @@ class SQLiteDAO {
         // This.db sẽ là biến đã kết nối csdl, ta gọi hàm run của this.db chính là gọi hàm run của sqlite3 trong NodeJS hỗ trợ (1 trong 3 hàm như đã nói ở trên)
         if (err) {
           //Trường hợp lỗi
-          if (!isSilence) console.log("Could NOT excute: ", sql, params, err);
+          if (!this.isDebug) console.log("Could NOT excute: ", sql, params, err);
           reject(err);
         } else {
           //Trường hợp chạy query thành công

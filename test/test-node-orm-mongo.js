@@ -2,7 +2,7 @@
 const connJsonMongodb = require("../cfg/orm-mongodb-cfg")
 
 // nhúng gói giao tiếp csdl và mô hình vào
-const { Model, DataTypes, database } = require("../node-orm")
+const { Model, DataTypes, database } = require("../lib-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonMongodb);
 

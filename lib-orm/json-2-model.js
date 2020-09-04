@@ -25,7 +25,7 @@ module.exports = (jsonData) => {
         let col = jsonData[key]
         // cấu hình định nghĩa cho trường dữ liệu
         let fiedlCfg = {
-            type: DataTypes[col[JSON_CFG.orm_data_type] || col["modelDataType"]],
+            type: DataTypes[col[JSON_CFG.orm_data_type] || col["modelDataType"]] || DataTypes["STRING"],
             notNull: col[JSON_CFG.orm_not_null] || col["notNull"],
             primaryKey: col[JSON_CFG.orm_primary_key] || col["primaryKey"],
             isUnique: col[JSON_CFG.orm_is_unique] || col["isUnique"],

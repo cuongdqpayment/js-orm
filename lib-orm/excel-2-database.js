@@ -133,7 +133,7 @@ const createExcel2Tables = (models) => {
  * @param {*} model 
  * @param {*} arrJson 
  */
-const importArray2Database = (model, arrJson, GROUP_COUNT = 100) => {
+const importArray2Database = (model, arrJson, GROUP_COUNT = 100, isDebug) => {
     if (!model || !arrJson || !arrJson.length) {
         return new Promise((rs, rj) => rj(`Không khai báo đầy đủ các biến vào: model, arrJson hoặc không có dữ liệu để chèn`));
     }
@@ -155,7 +155,8 @@ const importArray2Database = (model, arrJson, GROUP_COUNT = 100) => {
             //     console.log(`Error in insert to database for the batch ${i} - ${e}`)
             // })
             if (rslt) {
-                // console.log(`Kết quả chèn thành công:`, rslt)
+                if (isDebug) console.log(`Kết quả chèn:`, rslt)
+                // console.log(`Kết quả chèn thành công:`, rslt.map(x => x.status === "fulfilled"))
                 // console.log(`Kết quả chèn thất bại:`, rslt.map(x => x.status === "rejected"))
                 result.count_fail += rslt.filter(x => x.status === "rejected").length
                 result.count_insert += rslt.filter(x => x.status === "fulfilled").length
@@ -172,7 +173,7 @@ const importArray2Database = (model, arrJson, GROUP_COUNT = 100) => {
  * @param {*} excelFilename   // có thể dùng file data khác (không chứa mô hình)
  * @param {*} dataSheets = [`tên bảng`,...]// tên sheet trùng tên bảng cần chèn dữ liệu
  */
-const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COUNT = 100) => {
+const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COUNT = 100, isDebug) => {
     if (!models || !excelFilename || !dataSheets || !dataSheets.length) {
         return new Promise((rs, rj) => rj(`Không khai báo đầy đủ các biến vào: models, excelFilename, dataSheets hoặc không có sheet lấy dữ liệu`));
     }
@@ -191,7 +192,7 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
             2));
         // lấy mô hình của chính bảng dữ liệu đó
         let model = models.find(x => x.getName() === tableName)
-        if (model) importModels.push(importArray2Database(model, arrJson, GROUP_COUNT))
+        if (model) importModels.push(importArray2Database(model, arrJson, GROUP_COUNT, isDebug))
     }
     // thực hiện chèn dữ liệu làm đồng thời song song các bảng
     return Promise.all(importModels)

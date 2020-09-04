@@ -27,12 +27,11 @@ let jsonCfg = {
 // ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
 const connJsonCfg = require("../cfg/orm-sqlite-cfg")
 // const connJsonCfg = require("../cfg/orm-mongodb-cfg")
-// nhúng gói giao tiếp csdl và mô hình vào
-const { database } = require("../node-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 
-const { json2Model, Model } = require("../node-orm")
+// nhúng gói giao tiếp csdl và mô hình vào
+const { json2Model, Model, database } = require("../lib-orm")
 let jsonModel = json2Model(jsonCfg)
 
 const { waiting } = require("../utils");
@@ -49,7 +48,6 @@ waiting(20000, { hasData: () => db.isConnected() })
         .catch(e => console.log("Lỗi", e));
 
       console.log("Tạo ??", x);
-
 
     }
   });

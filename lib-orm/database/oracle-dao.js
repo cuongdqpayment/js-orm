@@ -18,8 +18,6 @@
  * executeFunction???, refCursor??
  */
 
-var isSilence = false;
-
 const configDefault = {
   poolAlias: "TestOracleDBPool", //ten cua pool
   user: "test", //username to oracle
@@ -68,7 +66,8 @@ class OracleDAO {
    * Khởi tạo cấu trúc csdl
    * @param {*} dbconfig
    */
-  constructor(dbconfig) {
+  constructor(dbconfig, isDebug) {
+    this.isDebug = isDebug;
     this.oracledb = require("oracledb");
     this.oracledb.autoCommit = true;
 
@@ -162,7 +161,7 @@ class OracleDAO {
    * @param {*} silence
    */
   setSilence(silence) {
-    isSilence = silence;
+    this.isDebug = !silence;
   }
 
   /**
@@ -716,7 +715,7 @@ class OracleDAO {
           this.doRelease(connectRunSql); // giải phóng connection này ngay tức thì
 
           if (err) {
-            if (!isSilence) console.log("Could NOT excute: " + sql);
+            if (this.isDebug) console.log("Could NOT excute: " + sql);
             reject(err);
           }
           //console.log('ket qua: ',result);
@@ -815,7 +814,7 @@ class OracleDAO {
           this.doRelease(connectRunSql); // giải phóng connection này ngay tức thì
 
           if (err) {
-            if (!isSilence) console.log("Could NOT excute: " + sql, err);
+            if (this.isDebug) console.log("Could NOT excute: " + sql, err);
             reject(err);
           } else {
             //lay ve theo kieu sqlite //khong theo kieu oracle
@@ -860,7 +859,7 @@ class OracleDAO {
           this.doRelease(connectRunSql); // giải phóng connection này ngay tức thì
 
           if (err) {
-            if (!isSilence) console.log("Could NOT excute: " + sql, err);
+            if (this.isDebug) console.log("Could NOT excute: " + sql, err);
             reject(err);
           } else {
             //tra ve kieu json default cho oracle khong co colum nname
@@ -950,11 +949,11 @@ class OracleDAO {
           this.doRelease(connectRunSql); // giải phóng connection này ngay tức thì
 
           if (err) {
-            if (!isSilence)
+            if (this.isDebug)
               console.log("Could NOT excute: " + sqlFunction, err);
             reject(err);
           }
-          //if (!isSilence) console.log(result);
+          //if (this.isDebug) console.log(result);
           if (result && result.outBinds) {
             resolve(result.outBinds); //Trả về một mảng kết quả giá trị của biến output
           } else {
@@ -992,10 +991,10 @@ class OracleDAO {
           this.doRelease(connectRunSql); // giải phóng connection này ngay tức thì
 
           if (err) {
-            if (!isSilence) console.log("Could NOT excute: " + sql, err);
+            if (this.isDebug) console.log("Could NOT excute: " + sql, err);
             reject(err);
           } else {
-            //if (!isSilence) console.log('Executed: ' + sql);
+            //if (this.isDebug) console.log('Executed: ' + sql);
             resolve(result); //Trả về kết quả là một câu lệnh.
             //Trường hợp createTable sẽ undified result
           }

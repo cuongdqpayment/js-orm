@@ -6,7 +6,7 @@ class DataType {
 
     static mapType = {
         dbTypes: ["js", "sqlite", "oracle", "mongodb"]
-        , STRING: ["string", "TEXT", "VARCHAR2(2000)", "string"]
+        , STRING: ["string", "TEXT", "VARCHAR2(255)", "string"]
         , NUMBER: ["number", "NUMBERIC", "NUMBER", "number"]
         , INTEGER: ["number", "INTEGER", "NUMBER", "number"]
         , BOOLEAN: ["boolean", "INTEGER", "NUMBER", "number"]

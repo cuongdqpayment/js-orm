@@ -17,7 +17,7 @@ var SQLiteDAO = require("./sqlite-dao"),
 let defaultCfg = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
   isDebug: true,
-  database: "../db/database/node-orm-demo-sqlite3.db",
+  database: "../db/database/lib-orm-demo-sqlite3.db",
   // phần giành cho các csdl có xác thực
   hosts: [{ host: "localhost", port: 8080 }],
   username: "test",
@@ -42,25 +42,37 @@ let defaultCfg = {
 class NodeDatabase {
   /**
    * @param {*} connCfg
-   * "type": "mongodb" | "oracle" | "sqlite3",
-   * "hosts": [{host:"127.0.0.1", "port":27017}],
-   * "database": "database name of mongo" | "filename of sqlite3" | "service_name of oracle",
-   * "pool_name": "Node-Orm-Pool"
-   * "username": "test",
-   * "password": "test123",
-   * "is_debug": false,
-   * poolMax: 2,             //so luong pool max
-   * poolMin: 2,             //so luong pool min
-   * poolIncrement: 0,       //so luong pool tang len neu co
-   * poolTimeout: 4,          //thoi gian pool timeout
-   * repSet: "rs0",        // Khai báo bộ db replicate
-   * isRoot: true,         // nếu user của mongo có quyền root tạo được db bất kỳ
+  type: "oracle", //  "mongodb" | "oracle" | "sqlite3"
+  isDebug: true,
+  database: "demo",
+  // phần giành cho các csdl có xác thực
+  hosts: [
+    { host: "localhost", port: 27019 },
+    { host: "localhost", port: 27018 },
+  ],
+  username: "demo",
+  password: "123",
+  // phần giành cho oracle database thêm
+  pool: {
+    name: "Node-Orm-Pool",
+    max: 2,
+    min: 2,
+    increment: 0,
+    idle: 10000,
+    timeout: 4,
+  },
+  // phần giành cho mongodb thêm
+  //   repSet: "rs0", // Khai báo bộ db replicate
+  isRoot: true, // nếu user của mongo có quyền root
+  // tham số phụ thêm vào để xác định csdl có hỗ trợ tự tạo auto_increment không?
+  // do oracle 11 nên không tự tạo được id tự tăng mà phải sử dụng mô hình để tạo
+  auto_increment_support: false,
    */
   constructor(connCfg) {
     this.cfg = connCfg || defaultCfg;
     switch (this.cfg.type) {
       case "sqlite3":
-        this.db = new SQLiteDAO(this.cfg.database);
+        this.db = new SQLiteDAO(this.cfg.database, connCfg.isDebug);
         break;
       case "oracle":
         let connectString = `(DESCRIPTION =
@@ -115,7 +127,7 @@ class NodeDatabase {
           poolMin: (this.cfg.pool ? this.cfg.pool.min : 0) || 2, //so luong pool min
           poolIncrement: (this.cfg.pool ? this.cfg.pool.increment : 0) || 0, //so luong pool tang len neu co
           poolTimeout: (this.cfg.pool ? this.cfg.pool.timeout : 0) || 4, //thoi gian pool timeout
-        });
+        }, connCfg.isDebug);
         break;
       case "mongodb":
         let hostString = `${this.cfg.host || "localhost"}:${
@@ -138,7 +150,7 @@ class NodeDatabase {
           (this.cfg.repSet
             ? `?replicaSet=${this.cfg.repSet}`
             : `?authSource=admin`);
-        this.db = new MongoDAO(uri, this.cfg.database);
+        this.db = new MongoDAO(uri, this.cfg.database, connCfg.isDebug);
         break;
       default:
         this.db = null;

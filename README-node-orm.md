@@ -54,6 +54,18 @@ let jsonData =
     "orm_foreign_key":"Khóa ngoại lai với bảng",
     "orm_default_value":"giá trị mặt định",
   },
+  // hoặc 
+  {
+    type: "INTEGER",
+    notNull: false,
+    primaryKey: true,
+    foreignKey: undefined,
+    autoIncrement: true,
+    isUnique: undefined,
+    uniqueMulti: undefined,
+    length: 100,
+    defaultValue: undefined
+  },
   // ví dụ:
   "field_name": {
     "orm_data_type": "STRING",
@@ -84,7 +96,7 @@ TIMESTAMP : Kiểu mili giây
 
 ```js
 // # lấy biến vào là khai báo jsonData ở trên
-const {json2Model, Model} = require("./node-orm")
+const {json2Model, Model} = require("./lib-orm")
 let jsonModel = json2Model(jsonData)
 // # ... trong đó db là kết nối database, tableName là bảng liên kết
 let model = new Model(db, tableName, jsonModel)
@@ -114,7 +126,7 @@ let rst = await model.readAll({});
 const connJsonCfg = require("../cfg/orm-mongodb-cfg")
 const excelFile = `./db/excel/admin.users.friends.v4-migration.xlsx`
 // nhúng gói giao tiếp csdl và mô hình vào
-const { database, excell2Database } = require("../node-orm")
+const { database, excell2Database } = require("../lib-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 

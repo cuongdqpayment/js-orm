@@ -8,10 +8,11 @@ const connJsonSqlite3 = require("../cfg/orm-sqlite-cfg")
 } */;
 
 // nhúng gói giao tiếp csdl và mô hình vào
-const { Model, DataTypes, database } = require("../node-orm")
+const { Model, database, json2Model } = require("../lib-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonSqlite3);
 
+const model = require("./json-model")
 
 const { waiting } = require("../utils");
 
@@ -22,35 +23,7 @@ waiting(20000, { hasData: () => db.isConnected() }).then((timeoutMsg) => {
         // csdl lưu table là user có cấu trúc là {username: string (100, not null),fullname: string(2000), role: number}
         // định nghĩa mô hình của user như sau:
         let user = new Model(
-            db, 'users_date_number',
-            {
-                id: {
-                    type: DataTypes.INTEGER,
-                    notNull: false,
-                    primaryKey: true,
-                    autoIncrement: true,
-                    length: 100
-                },
-                username: {
-                    type: DataTypes.STRING,
-                    notNull: false,
-                    isUnique: true,
-                    length: 100
-                },
-                nickname: {
-                    type: DataTypes.STRING,
-                    notNull: false,
-                    length: 5
-                },
-                fullname: DataTypes.STRING,
-                role: {
-                    type: DataTypes.NUMBER,
-                    defaultValue: 1
-                },
-                birth_date: DataTypes.DATE,
-                log_time: DataTypes.TIMESTAMP,
-                status: DataTypes.BOOLEAN
-            }
+            db, 'users_date_number', json2Model(model)
         )
 
         // thực hiện tạo bảng user trong csdl bằng cách gọi lệnh
