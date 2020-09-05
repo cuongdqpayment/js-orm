@@ -1,5 +1,6 @@
-## ORM for javascript with sqlite3, oracle, mongodb
-# Use with node 12.9 or later for Promise.allSettled
+### ORM for javascript with sqlite3, oracle, mongodb
+
+## Use with node 12.9 or later for Promise.allSettled
 
 # 1. Make your config in `./cfg/orm-conn-cfg.js` with:
 ```js
@@ -81,13 +82,13 @@ let jsonData =
 ```
 - Data types of this model:
 ```
-STRING : kiểu chuỗi, text
-INTEGER : kiểu số nguyên, đánh số 
-NUMBER  : Kiểu số thập phân 
-BOOLEAN : kiểu logic 0,1
-DATE    : Kiểu ngày
-DATETIME : Kiểu ngày giờ
-TIMESTAMP : Kiểu mili giây
+STRING : for TEXT in sqlite, VARCHAR2(2000) in Oracle
+INTEGER : for INTEGER in sqlite, NUMBER in oracle
+NUMBER  : for NUMERIC in sqlite, NUMBER in oracle
+BOOLEAN : logic 0,1
+DATE    : TEXT save date format yyyy-mm-dd in sqlite, Date in oracle
+DATETIME : TEXT save date format yyyy-mm-dd hh:mi:ss in sqlite, Date in oracle
+TIMESTAMP : milisecond 
 ```
 - Test case for run:
 ```sh
@@ -160,13 +161,13 @@ let rst = await model.readAll({});
 - Demo for excel:
 
 ```js
-// ví dụ khai báo một csdl như sau: ví dụ mở connect csdl thử
+// for example:
 // const connJsonCfg = require("../cfg/orm-sqlite-cfg")
 const connJsonCfg = require("../cfg/orm-mongodb-cfg")
 const excelFile = `./db/excel/admin.users.friends.v4-migration.xlsx`
-// nhúng gói giao tiếp csdl và mô hình vào
+// import components of orm model
 const { database, excell2Database } = require("node-js-orm")
-// khai báo và connect csdl để giao tiếp
+// init db for connection pool
 const db = new database.NodeDatabase(connJsonCfg);
 
 const { waiting } = require("../utils");
@@ -178,8 +179,8 @@ waiting(20000, { hasData: () => db.isConnected() })
         if (!timeoutMsg) {
             // 1. init model from excel file
             let models = await excell2Database.createExcel2Models(db, excelFile)
-            console.log("KQ Tạo mô hình:", models.filter(x => x.getName() === "tables").map(x => x.getStructure())[0]);
-            // console.log("KQ Tạo mô hình:", models.map(x => x.getName()));
+            console.log("Result of create model:", models.filter(x => x.getName() === "tables").map(x => x.getStructure())[0]);
+            // console.log("Result of create model:", models.map(x => x.getName()));
 
             // 2. Create table and index
             let resultTable = await excell2Database.createExcel2Tables(models)
