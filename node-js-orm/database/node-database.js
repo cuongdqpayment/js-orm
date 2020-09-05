@@ -17,7 +17,7 @@ var SQLiteDAO = require("./sqlite-dao"),
 let defaultCfg = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
   isDebug: true,
-  database: "../db/database/lib-orm-demo-sqlite3.db",
+  database: "../db/database/node-js-orm-demo-sqlite3.db",
   // phần giành cho các csdl có xác thực
   hosts: [{ host: "localhost", port: 8080 }],
   username: "test",

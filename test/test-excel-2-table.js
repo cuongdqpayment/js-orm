@@ -4,7 +4,7 @@ const connJsonCfg = require("../cfg/orm-sqlite-cfg")
 // const connJsonCfg = require("../cfg/orm-oracle-cfg")
 const excelFile = `./db/excel/sample.excel-2-node-orm.xlsx`
 // nhúng gói giao tiếp csdl và mô hình vào
-const { database, excell2Database } = require("../lib-orm")
+const { database, excell2Database } = require("../node-js-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 

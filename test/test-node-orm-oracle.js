@@ -2,7 +2,7 @@
 const connJsonOracle = require("../cfg/orm-oracle-cfg")
 
 // nhúng gói giao tiếp csdl và mô hình vào
-const { Model, DataTypes, database } = require("../lib-orm")
+const { Model, DataTypes, database } = require("../node-js-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonOracle);
 

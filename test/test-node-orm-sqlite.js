@@ -8,7 +8,7 @@ const connJsonSqlite3 = require("../cfg/orm-sqlite-cfg")
 } */;
 
 // nhúng gói giao tiếp csdl và mô hình vào
-const { Model, database, json2Model } = require("../lib-orm")
+const { Model, database, json2Model } = require("../node-js-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonSqlite3);
 

@@ -31,7 +31,7 @@ const connJsonCfg = require("../cfg/orm-sqlite-cfg")
 const db = new database.NodeDatabase(connJsonCfg);
 
 // nhúng gói giao tiếp csdl và mô hình vào
-const { json2Model, Model, database } = require("../lib-orm")
+const { json2Model, Model, database } = require("../node-js-orm")
 let jsonModel = json2Model(jsonCfg)
 
 const { waiting } = require("../utils");

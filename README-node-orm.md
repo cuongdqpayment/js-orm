@@ -6,7 +6,7 @@
 module.exports = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
   isDebug: true,
-  database: "../db/database/node-orm-demo-sqlite3.db",
+  database: "../db/database/node-js-orm-demo-sqlite3.db",
   // phần giành cho các csdl có xác thực
   hosts: [{ host: "localhost", port: 8080 }],
   username: "test",
@@ -96,7 +96,7 @@ TIMESTAMP : Kiểu mili giây
 
 ```js
 // # lấy biến vào là khai báo jsonData ở trên
-const {json2Model, Model} = require("./lib-orm")
+const {json2Model, Model} = require("./node-js-orm")
 let jsonModel = json2Model(jsonData)
 // # ... trong đó db là kết nối database, tableName là bảng liên kết
 let model = new Model(db, tableName, jsonModel)
@@ -126,7 +126,7 @@ let rst = await model.readAll({});
 const connJsonCfg = require("../cfg/orm-mongodb-cfg")
 const excelFile = `./db/excel/admin.users.friends.v4-migration.xlsx`
 // nhúng gói giao tiếp csdl và mô hình vào
-const { database, excell2Database } = require("../lib-orm")
+const { database, excell2Database } = require("../node-js-orm")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 
@@ -154,4 +154,15 @@ waiting(20000, { hasData: () => db.isConnected() })
 
         }
     });
+```
+
+
+## -- Xuất bản npm publish
+```sh
+npm login
+# user - namedq@Shrthand login với user - namedq(namedq.pay@g)
+# change version on package.json for publish
+cd js-orm
+npm publish
+cd ../
 ```
