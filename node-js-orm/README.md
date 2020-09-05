@@ -90,22 +90,66 @@ DATETIME : Kiểu ngày giờ
 TIMESTAMP : Kiểu mili giây
 ```
 - Test case for run:
+```sh
+npm i node-js-orm
+```
 
 ```js
-// # lấy biến vào là khai báo jsonData ở trên
-const {json2Model, Model} = require("./node-js-orm")
+// # get input from jsonData above
+let jsonData = {
+    id: {
+        type: "INTEGER",
+        notNull: false,
+        primaryKey: true,
+        // foreignKey: undefined,
+        autoIncrement: true,
+        // isUnique: undefined,
+        // uniqueMulti: undefined,
+        length: 100,
+        // defaultValue: undefined
+    },
+    username: {
+        type: "STRING",
+        notNull: false,
+        isUnique: true,
+        length: 100
+    },
+    nickname: {
+        type: "STRING",
+        notNull: false,
+        length: 5
+    },
+    fullname: "STRING",
+    role: {
+        type: "NUMBER",
+        defaultValue: 1
+    },
+    birth_date: "DATE",
+    log_time: "TIMESTAMP",
+    status: "BOOLEAN"
+}
+// require db connection 
+const connJson = require("../cfg/orm-sqlite-cfg")
+
+// import this library for use
+const {json2Model, Model, database} = require("node-js-orm")
+// init connection of db
+const db = new database.NodeDatabase(connJson);
+
+// change json to jsonModel
 let jsonModel = json2Model(jsonData)
-// # ... trong đó db là kết nối database, tableName là bảng liên kết
+
+// # ... init model with db
 let model = new Model(db, tableName, jsonModel)
 
-// # Tạo bảng :
+// # create table :
  await model.sync();
 
-// # chèn dữ liệu :
+// # insert record into db :
 let rslt = await model.create({
                     username: 'cuongdq'
                 });
-// # đọc dữ liệu
+// # read rows from db
 let rst = await model.readAll({});
 ```
 
@@ -116,36 +160,37 @@ let rst = await model.readAll({});
 - Demo for excel:
 
 ```js
-// ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
+// ví dụ khai báo một csdl như sau: ví dụ mở connect csdl thử
 // const connJsonCfg = require("../cfg/orm-sqlite-cfg")
 const connJsonCfg = require("../cfg/orm-mongodb-cfg")
 const excelFile = `./db/excel/admin.users.friends.v4-migration.xlsx`
 // nhúng gói giao tiếp csdl và mô hình vào
-const { database, excell2Database } = require("../node-js-orm")
-// khai báo và kết nối csdl để giao tiếp
+const { database, excell2Database } = require("node-js-orm")
+// khai báo và connect csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 
 const { waiting } = require("../utils");
 
+// or use setTimeout(()=>{...},5000)
 waiting(20000, { hasData: () => db.isConnected() })
     .then(async (timeoutMsg) => {
-        // console.log("kết nối", db.isConnected());
+        // console.log("connect", db.isConnected());
         if (!timeoutMsg) {
-            // 1. Thực hiện tạo mô hình từ excel file
+            // 1. init model from excel file
             let models = await excell2Database.createExcel2Models(db, excelFile)
             console.log("KQ Tạo mô hình:", models.filter(x => x.getName() === "tables").map(x => x.getStructure())[0]);
             // console.log("KQ Tạo mô hình:", models.map(x => x.getName()));
 
-            // 2. Thực hiện tạo bảng từ mô hình, nếu bảng đã tạo, index đã tạo trước đó thì sẽ báo lỗi
+            // 2. Create table and index
             let resultTable = await excell2Database.createExcel2Tables(models)
-            console.log("KQ tạo bảng:", resultTable);
+            console.log("Result of create table:", resultTable);
 
-            // 3. Định nghĩa các bảng cần chèn dữ liệu vào
+            // 3. List tables/sheets to import
             let tableNames = ["admin_users"]
 
-            // 4. Thực hiện đọc dữ liệu từ 
+            // 4. Do import into db from sheets of excel listed above 
             let resultImport = await excell2Database.importExcel2Database(models, excelFile, tableNames, 1)
-            console.log("KQ import dữ liệu:", resultImport);
+            console.log("Resulte of import db:", resultImport);
 
         }
     });

@@ -1,5 +1,5 @@
 {
-  "name": "@cuongdq/js-orm",
+  "name": "node-js-orm",
   "version": "1.0.2",
   "description": "Library for model of database and javascript",
   "repository": "https://github.com/cuongdqpayment/js-orm.git",
