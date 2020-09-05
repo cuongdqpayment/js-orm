@@ -1,17 +1,17 @@
-## Hướng dẫn sử dụng mô hình giao tiếp csdl sqlite3, oracle, mongodb
-# Phải sử dụng node 12.9 trở lên mới dùng được Promise.allSettled
+## ORM for javascript with sqlite3, oracle, mongodb
+# Use with node 12.9 or later for Promise.allSettled
 
-# 1. Thực hiện khai báo cấu hình kết nối db tại `./cfg/orm-conn-cfg.js`:
+# 1. Make your config in `./cfg/orm-conn-cfg.js` with:
 ```js
 module.exports = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
   isDebug: true,
   database: "../db/database/node-js-orm-demo-sqlite3.db",
-  // phần giành cho các csdl có xác thực
+  // for db with authentication
   hosts: [{ host: "localhost", port: 8080 }],
   username: "test",
   password: "test123",
-  // phần giành cho oracle database thêm
+  // for oracle
   pool: {
     name: "Node-Orm-Pool",
     max: 2,
@@ -20,16 +20,15 @@ module.exports = {
     idle: 10000,
     timeout: 4,
   },
-  // phần giành cho mongodb thêm
-  repSet: "rs0", // Khai báo bộ db replicate
-  isRoot: true, // nếu user của mongo có quyền root t
-  // tham số phụ thêm vào để xác định csdl có hỗ trợ tự tạo auto_increment không?
-  // nếu csdl nào không hổ trợ thì tắt nó đi và sử dụng mô hình model để tạo id tự động
+  // for mongodb 
+  repSet: "rs0", // db replicate
+  isRoot: true, // if user of mongo with root right
+  // for db support auto increment
   auto_increment_support: true,
 }
 ```
 
-# 2. cài đặt driver kết nối csdl tương ứng nếu sử dụng nó, một trong những hoặc tất cả nếu muốn migration sang:
+# 2. install driver for db:
 ```sh
 npm i sqlite3
 # or
@@ -37,9 +36,7 @@ npm i oracle
 # or
 npm i mongodb
 ```
-# 3. Sử dụng json để khai báo mô hình
-- LƯU Ý Trường hợp không khai báo định nghĩa mô hình, thì việc tạo các ràng buộc, tự sinh id, chuyển đổi loại dữ liệu trước khi chèn, cập nhập sẽ không áp dụng được, khi đó chỉ có thể chèn các dữ liệu đơn giản như số và chữ.
-- Trường hợp không dùng file excel, phải khai báo các JSON chứa cấu trúc của mô hình như sau:
+# 3. Use with json for define model:
 ```json
 let jsonData = 
 {
@@ -82,7 +79,7 @@ let jsonData =
   
 }
 ```
-- Các kiểu dữ liệu hiện có của mô hình gồm:
+- Data types of this model:
 ```
 STRING : kiểu chuỗi, text
 INTEGER : kiểu số nguyên, đánh số 
@@ -92,7 +89,7 @@ DATE    : Kiểu ngày
 DATETIME : Kiểu ngày giờ
 TIMESTAMP : Kiểu mili giây
 ```
-- Chuyển đổi dữ liệu khai báo mô hình bằng json sang mô hình bằng công cụ:
+- Test case for run:
 
 ```js
 // # lấy biến vào là khai báo jsonData ở trên
@@ -112,13 +109,11 @@ let rslt = await model.create({
 let rst = await model.readAll({});
 ```
 
-# 4. Sử dụng excel để khai báo mô hình. Định nghĩa mô hình bằng file excel tại sheet `tables` gồm tên bảng, tên trường, kiểu dữ liệu để ràng buộc dữ liệu, cũng như có thể tự động tạo bảng bằng lệnh model.sync()
+# 4. Use excel for define model. The sample in excel at sheet `tables`. To make table with model.sync()
 
-- Tạo cấu trúc mô hình bằng excel như mẫu `./db/excel/sample.excel-2-node-orm.xlsx` tại sheet tables
+- The sample for excel: `./db/excel/sample.excel-2-node-orm.xlsx` at sheet tables
 
-- khai báo kết nối dữ liệu như bước 1
-
-- Thực hiện chạy thử tạo bảng và chèn dữ liệu như sau:
+- Demo for excel:
 
 ```js
 // ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
@@ -154,15 +149,4 @@ waiting(20000, { hasData: () => db.isConnected() })
 
         }
     });
-```
-
-
-## -- Xuất bản npm publish
-```sh
-npm login
-# user - namedq@Shrthand login với user - namedq(namedq.pay@g)
-# change version on package.json for publish
-cd js-orm
-npm publish
-cd ../
 ```

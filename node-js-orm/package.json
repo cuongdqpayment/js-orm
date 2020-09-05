@@ -7,7 +7,7 @@
   "scripts": {
     "test": "node ./test/test-node-orm-sqlite.js"
   },
-  "keywords": ["nodejs", "sqlite3", "oracle", "mongodb", "orm", "model", "database", "data type"],
+  "keywords": ["nodejs", "excel", "sqlite3", "oracle", "mongodb", "orm", "model", "database", "data type"],
   "author": "cuong.dq",
   "license": "ISC",
   "dependencies": {
