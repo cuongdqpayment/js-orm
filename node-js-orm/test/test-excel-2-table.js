@@ -1,14 +1,14 @@
 // ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
-const connJsonCfg = require("../cfg/orm-sqlite-cfg")
+const connJsonCfg = require("../../cfg/orm-sqlite-cfg");
 // const connJsonCfg = require("../cfg/orm-mongodb-cfg")
 // const connJsonCfg = require("../cfg/orm-oracle-cfg")
-const excelFile = `./db/excel/sample.excel-2-node-orm.xlsx`
+const excelFile = `./node-js-orm/excel/sample.excel-2-node-orm.xlsx`;
 // nhúng gói giao tiếp csdl và mô hình vào
-const { database, excell2Database } = require("../node-js-orm")
+const { database, excell2Database } = require("../index");
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 
-const { waiting } = require("../utils");
+const { waiting } = require("../../utils");
 
 waiting(20000, { hasData: () => db.isConnected() })
     .then(async (timeoutMsg) => {
@@ -25,7 +25,7 @@ waiting(20000, { hasData: () => db.isConnected() })
             console.log("KQ tạo bảng:", resultTable);
 
             // 3. Định nghĩa các bảng cần chèn dữ liệu vào
-            let tableNames = ["tables", "data_types" ]
+            let tableNames = ["tables", "data_types"]
 
             // 4. Thực hiện đọc dữ liệu từ 
             let resultImport = await excell2Database.importExcel2Database(models, excelFile, tableNames, 100, true)

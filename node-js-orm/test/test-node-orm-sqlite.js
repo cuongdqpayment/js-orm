@@ -1,5 +1,5 @@
 // ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
-const connJsonSqlite3 = require("../cfg/orm-sqlite-cfg")
+const connJsonSqlite3 = require("../../cfg/orm-sqlite-cfg")
 /* {
     type: "sqlite3",
     isDebug: true,
@@ -8,13 +8,13 @@ const connJsonSqlite3 = require("../cfg/orm-sqlite-cfg")
 } */;
 
 // nhúng gói giao tiếp csdl và mô hình vào
-const { Model, database, json2Model } = require("../node-js-orm")
+const { Model, database, json2Model } = require("../index")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonSqlite3);
 
 const model = require("./json-model")
 
-const { waiting } = require("../utils");
+const { waiting } = require("../../utils");
 
 waiting(20000, { hasData: () => db.isConnected() }).then((timeoutMsg) => {
     // console.log("kết nối", db.isConnected());
@@ -23,7 +23,7 @@ waiting(20000, { hasData: () => db.isConnected() }).then((timeoutMsg) => {
         // csdl lưu table là user có cấu trúc là {username: string (100, not null),fullname: string(2000), role: number}
         // định nghĩa mô hình của user như sau:
         let user = new Model(
-            db, 'users_date_number', json2Model(model)
+            db, 'users_date_number', json2Model.jsonText2Model(model)
         )
 
         // thực hiện tạo bảng user trong csdl bằng cách gọi lệnh

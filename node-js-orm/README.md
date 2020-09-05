@@ -52,7 +52,8 @@ let jsonData =
     "orm_foreign_key":"Khóa ngoại lai với bảng",
     "orm_default_value":"giá trị mặt định",
   },
-  // hoặc 
+  // example 
+  field_x :
   {
     type: "INTEGER",
     notNull: false,
@@ -64,7 +65,7 @@ let jsonData =
     length: 100,
     defaultValue: undefined
   },
-  // ví dụ:
+  // or 
   "field_name": {
     "orm_data_type": "STRING",
     "orm_not_null": "1",
@@ -76,8 +77,37 @@ let jsonData =
     "orm_primary_key": "",
     "orm_is_unique": "",
   },
-  // hoặc
-  
+  // example for one model of table
+  {
+    table_name: {
+                  type: 'STRING',
+                  notNull: '1',
+                  uniqueKeyMulti: 'table_name,  field_name',
+                  length: '30'
+                },
+  field_name: { type: 'STRING', notNull: '1', length: '30' },
+  description: { type: 'STRING', length: '500' },
+  options: { type: 'STRING', length: '300' },
+  option_index: { type: 'STRING', length: '10' },
+  orm_data_type: { type: 'STRING', notNull: '1', length: '20' },
+  orm_length: { type: 'INTEGER', length: '10' },
+  orm_not_null: { type: 'BOOLEAN', length: '1' },
+  orm_primary_key: { type: 'BOOLEAN', length: '1' },
+  orm_auto_increment: { type: 'BOOLEAN', length: '1' },
+  orm_is_unique: { type: 'BOOLEAN', length: '1' },
+  orm_unique_multi: { type: 'STRING', length: '100' },
+  orm_foreign_key: { type: 'STRING' },
+  orm_default_value: { type: 'STRING', length: '100' },
+  order_1: { type: 'INTEGER', length: '10' }
+  },
+  // or table of data_types:
+  {
+    model: { type: 'STRING', notNull: '1', primaryKey: '1', length: '20' },
+    javascript: { type: 'STRING', length: '20' },
+    sqlite: { type: 'STRING', length: '20' },
+    oracle: { type: 'STRING', length: '20' },
+    mongodb: { type: 'STRING', length: '20' }
+  }
 }
 ```
 - Data types of this model:
@@ -156,7 +186,7 @@ let rst = await model.readAll({});
 
 # 4. Use excel for define model. The sample in excel at sheet `tables`. To make table with model.sync()
 
-- The sample for excel: `./db/excel/sample.excel-2-node-orm.xlsx` at sheet tables
+- The sample for excel: `./node-js-orm/excel/sample.excel-2-node-orm.xlsx` at sheet tables
 
 - Demo for excel:
 
@@ -164,7 +194,7 @@ let rst = await model.readAll({});
 // for example:
 // const connJsonCfg = require("../cfg/orm-sqlite-cfg")
 const connJsonCfg = require("../cfg/orm-mongodb-cfg")
-const excelFile = `./db/excel/admin.users.friends.v4-migration.xlsx`
+const excelFile = `./node-js-orm/excel/admin.users.friends.v4-migration.xlsx`
 // import components of orm model
 const { database, excell2Database } = require("node-js-orm")
 // init db for connection pool

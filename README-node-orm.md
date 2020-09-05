@@ -1,5 +1,9 @@
-## Hướng dẫn sử dụng mô hình giao tiếp csdl sqlite3, oracle, mongodb
-# Phải sử dụng node 12.9 trở lên mới dùng được Promise.allSettled
+
+## Mô hình giao tiếp dữ liệu và javascript.
+Xây dựng thư viện kết nối cơ sở dữ liệu sqlite, oracle, mongodb, và tổ chức mô hình tương thích các kiểu cơ sở dữ liệu để có thể migrate các cơ sở dữ liệu với nhau một cách thuận lợi nhất
+Thư viện này được xây dựng dựa trên các nhu cầu như tạo bảng từ việc khai báo mô hình, hoặc xây dựng mô hình từ file excel, tự động tạo csdl từ file excel, chuyển đổi file excel sang file mô hình text json, và tự động import dữ liệu từ excel hoặc từ csdl này qua csdl khác một cách thuận lợi, nhanh chóng.
+
+# Chương trình được viết có sử dụng  Promise.allSettled nên phải sử dụng node 12.9 trở lên mới dùng được
 
 # 1. Thực hiện khai báo cấu hình kết nối db tại `./cfg/orm-conn-cfg.js`:
 ```js

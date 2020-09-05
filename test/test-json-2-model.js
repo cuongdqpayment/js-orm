@@ -32,7 +32,7 @@ const db = new database.NodeDatabase(connJsonCfg);
 
 // nhúng gói giao tiếp csdl và mô hình vào
 const { json2Model, Model, database } = require("../node-js-orm")
-let jsonModel = json2Model(jsonCfg)
+let jsonModel = json2Model.jsonText2Model(jsonCfg)
 
 const { waiting } = require("../utils");
 

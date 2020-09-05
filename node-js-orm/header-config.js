@@ -1,0 +1,18 @@
+module.exports = {
+    table_name: "table_name"
+    , field_name: "field_name"
+    , description: "description"
+    , data_type: "data_type"
+    , options: "options"
+    , option_index: "option_index"
+    , orm_data_type: "orm_data_type"
+    , orm_length: "orm_length"
+    , orm_not_null: "orm_not_null"
+    , orm_primary_key: "orm_primary_key"
+    , orm_auto_increment: "orm_auto_increment"
+    , orm_is_unique: "orm_is_unique"
+    , orm_unique_multi: "orm_unique_multi"
+    , orm_default_value: "orm_default_value"
+    , orm_foreign_key: "orm_foreign_key"
+    , order_1: "order_1"
+}

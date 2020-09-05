@@ -8,7 +8,7 @@
 const xlsxtojson1st = require("xlsx-to-json-lc");
 // nhúng mô hình giao tiếp dữ liệu để xử lý tạo bảng, chèn dữ liệu từ excel
 const Model = require("./model");
-const DataTypes = require("./data-types");
+const { array2JsonTexts, jsonText2Model } = require("./json-2-model");
 
 // sử dụng Promise.allSettled để thay cho Promise.all để bỏ qua các lỗi và cho thực thi tiếp
 // chỉ hỗ trợ từ node 12.9 trở lên
@@ -17,32 +17,15 @@ allSettled.shim();
 
 // Cấu trúc bảng json tạo bảng gồm, 
 // nếu trên sheet tables mà các tên trường thay đổi không như mặt định thì phải khai báo lại
-const SHEET_CFG = "tables"
-const HEADER_CFG = {
-    table_name: "table_name"
-    , field_name: "field_name"
-    , description: "description"
-    , data_type: "data_type"
-    , options: "options"
-    , option_index: "option_index"
-    , orm_data_type: "orm_data_type"
-    , orm_length: "orm_length"
-    , orm_not_null: "orm_not_null"
-    , orm_primary_key: "orm_primary_key"
-    , orm_auto_increment: "orm_auto_increment"
-    , orm_is_unique: "orm_is_unique"
-    , orm_unique_multi: "orm_unique_multi"
-    , orm_default_value: "orm_default_value"
-    , orm_foreign_key: "orm_foreign_key"
-    , order_1: "order_1"
-}
+const SHEET_CFG = "tables";
+const HEADER_CFG = require("./header-config");
 
 /**
  * Đọc excel chuyển thành mảng json để xử lý
  * @param {*} excelFilename 
  * @param {*} sheetName 
  */
-const excel2Json = (excelFilename, sheetName = SHEET_CFG) => {
+const excel2Array = (excelFilename, sheetName = SHEET_CFG) => {
     return new Promise((rs, rj) => {
         xlsxtojson1st({
             input: excelFilename,   // tên file cần lấy dữ liệu excel .xlsx 
@@ -68,39 +51,20 @@ const excel2Json = (excelFilename, sheetName = SHEET_CFG) => {
  * @param {*} headerCfg 
  */
 const createExcel2Models = (db, excelFilename, sheetName = SHEET_CFG, headerCfg = HEADER_CFG) => {
-    return excel2Json(excelFilename, sheetName)
+    return excel2Array(excelFilename, sheetName)
         .then(tables => {
             // khai báo các biến lưu trũ kết quả
             let result = { table_models: [] }
-            // mảng lọc các tên bảng độc lập
-            let distinct_table_name = [...new Set(tables.map(x => x[headerCfg.table_name]))];
-            // duyệt tất cả các bảng đã lấy được
-            for (let tableName of distinct_table_name) {
-                // Lọc lấy các dòng có cùng tên bảng [{table_name, data_type, options, descriptions, ...} , ...]
-                let tableCols = tables.filter((x) => x[headerCfg.table_name] === tableName);
-                // Nếu có dữ liệu được lọc có độ dài
-                if (tableCols && tableCols.length > 0) {
-                    let jsonTableModel = {}
-                    for (let col of tableCols) {
-                        // cấu hình định nghĩa cho trường dữ liệu
-                        let fiedlCfg = {
-                            type: DataTypes[col[headerCfg.orm_data_type]],
-                            modelDataType: col[headerCfg.orm_data_type],
-                            notNull: col[headerCfg.orm_not_null],
-                            primaryKey: col[headerCfg.orm_primary_key],
-                            isUnique: col[headerCfg.orm_is_unique],
-                            uniqueKeyMulti: col[headerCfg.orm_unique_multi],
-                            foreignKey: col[headerCfg.orm_foreign_key],
-                            autoIncrement: col[headerCfg.orm_auto_increment],
-                            length: col[headerCfg.orm_length],
-                            defaultValue: col[headerCfg.orm_default_value],
-                        }
-                        Object.defineProperty(jsonTableModel, col[headerCfg.field_name], {
-                            value: fiedlCfg, writable: true, enumerable: true, configurable: true,
-                        })
-                    }
-                    result.table_models.push(new Model(db, tableName, jsonTableModel))
-                }
+            // chuyển đổi mảng theo hàng, cột ở excel sang đối tượng tương thích mô hình
+            let jsonTextModels = array2JsonTexts(tables, headerCfg);
+            for (let tablename in jsonTextModels) {
+                // lấy lại cấu hình mô hình từng bảng
+                let textModel = jsonTextModels[tablename];
+                // có thể in mô hình này ra, copy vào model của dự án để không phải đọc lại từ excel
+                console.log(`TABLE_name = ${tablename}:`, textModel);
+                // chuyển đổi kiểu mô hình DataTypes
+                let jsonTableModel = jsonText2Model(textModel);
+                result.table_models.push(new Model(db, tablename, jsonTableModel))
             }
             return result.table_models
         })
@@ -179,7 +143,7 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
     }
     let importModels = [];
     for (let tableName of dataSheets) {
-        let results = await excel2Json(excelFilename, tableName)
+        let results = await excel2Array(excelFilename, tableName)
             .catch(err => {
                 console.log('Lỗi đọc sheet ', err);
             });
@@ -200,7 +164,7 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
 
 module.exports = {
     // chuyển đổi excel sang arrayJson
-    excel2Json
+    excel2Array
     // Khởi tạo mô hình để kiểm tra dữ liệu và giao tiếp csdl
     // chuyển đổi dữ liệu của một sheet định nghĩa về mô hình, trở thành mô hình để thao tác giao tiếp
     , createExcel2Models
