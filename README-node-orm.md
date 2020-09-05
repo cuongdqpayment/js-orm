@@ -162,7 +162,7 @@ waiting(20000, { hasData: () => db.isConnected() })
 npm login
 # user - namedq@Shrthand login với user - namedq(namedq.pay@g)
 # change version on package.json for publish
-cd js-orm
+cd node-js-orm
 npm publish
 cd ../
 ```
