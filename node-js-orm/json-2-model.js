@@ -64,25 +64,34 @@ const jsonText2Model = (jsonTextModel, headerCfg = HEADER_CFG) => {
     for (let key in jsonTextModel) {
         let col = jsonTextModel[key]
         // cấu hình định nghĩa cho trường dữ liệu
-        let fiedlCfg = {
-            type: DataTypes[col[headerCfg.orm_data_type] || col["modelDataType"] || col["type"]] || DataTypes["STRING"],
-            notNull: col[headerCfg.orm_not_null] || col["notNull"],
-            primaryKey: col[headerCfg.orm_primary_key] || col["primaryKey"],
-            isUnique: col[headerCfg.orm_is_unique] || col["isUnique"],
-            uniqueKeyMulti: col[headerCfg.orm_unique_multi] || col["uniqueKeyMulti"],
-            foreignKey: col[headerCfg.orm_foreign_key] || col["foreignKey"],
-            autoIncrement: col[headerCfg.orm_auto_increment] || col["autoIncrement"],
-            length: col[headerCfg.orm_length] || col["length"],
-            defaultValue: col[headerCfg.orm_default_value] || col["defaultValue"],
+        let fiedlCfg = {};
+        if (typeof col === "object") {
+            fiedlCfg.type = DataTypes[col[headerCfg.orm_data_type]] || DataTypes[col["modelDataType"]] || DataTypes[col["type"]] || DataTypes["STRING"];
+            if (col[headerCfg.orm_not_null] || col["notNull"])
+                fiedlCfg.notNull = col[headerCfg.orm_not_null] || col["notNull"];
+
+            if (col[headerCfg.orm_primary_key] || col["primaryKey"])
+                fiedlCfg.primaryKey = col[headerCfg.orm_primary_key] || col["primaryKey"];
+            if (col[headerCfg.orm_is_unique] || col["isUnique"])
+                fiedlCfg.isUnique = col[headerCfg.orm_is_unique] || col["isUnique"];
+            if (col[headerCfg.orm_unique_multi] || col["uniqueKeyMulti"])
+                fiedlCfg.uniqueKeyMulti = col[headerCfg.orm_unique_multi] || col["uniqueKeyMulti"];
+            if (col[headerCfg.orm_foreign_key] || col["foreignKey"])
+                fiedlCfg.foreignKey = col[headerCfg.orm_foreign_key] || col["foreignKey"];
+            if (col[headerCfg.orm_auto_increment] || col["autoIncrement"])
+                fiedlCfg.autoIncrement = col[headerCfg.orm_auto_increment] || col["autoIncrement"];
+            if (col[headerCfg.orm_length] || col["length"])
+                fiedlCfg.length = col[headerCfg.orm_length] || col["length"];
+            if (col[headerCfg.orm_default_value] || col["defaultValue"])
+                fiedlCfg.defaultValue = col[headerCfg.orm_default_value] || col["defaultValue"];
+        } else {
+            fiedlCfg.type = DataTypes[col] || DataTypes["STRING"];
         }
-        Object.defineProperty(jsonModel, key, {
-            value: fiedlCfg, writable: true, enumerable: true, configurable: true,
-        })
+        jsonModel[key] = fiedlCfg;
     }
     // trả về mô hình có kiểu dữ liệu kiểu đối tượng của mô hình 
     return jsonModel;
 }
-
 
 module.exports = {
     // chuyển đổi từ mảng sang mô hình kiểu text (để copy vào json thuận lợi nhanh hơn)

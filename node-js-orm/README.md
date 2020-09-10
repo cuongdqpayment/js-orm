@@ -1,6 +1,10 @@
 ### ORM for javascript with sqlite3, oracle, mongodb
-
 ## Use with node 12.9 or later for Promise.allSettled
+
+# install
+```sh
+npm i node-js-orm
+```
 
 # 1. Make your config in `./cfg/orm-conn-cfg.js` with:
 ```js
@@ -226,3 +230,5 @@ waiting(20000, { hasData: () => db.isConnected() })
         }
     });
 ```
+
+# 5. When db created, no need model, we use only db for insert, update, delete, select and runSql,...

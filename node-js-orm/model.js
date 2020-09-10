@@ -15,6 +15,8 @@
  * Và nó chỉ lọc lấy những dữ liệu đã được định nghĩa theo mô hình, còn các trường khác sẽ bị loại bỏ (thừa)
  *
  * Các ràng buộc dữ liệu không xử lý ở đây, mà chỉ csdl sẽ xử lý để đơn giản hóa khâu này
+ * 
+ * fix true data ok 2020-09-10
  */
 
 // kiểu csdl để validate
@@ -235,10 +237,11 @@ class Model {
       let el = this.tableStructure[key];
       let value = jsonData[key];
       if (value !== undefined) {
-        let trueData =
-          el & el.type
-            ? this.getTrueData(value, el.type)
-            : this.getTrueData(value, el);
+
+        let trueData = el && el.type
+          ? this.getTrueData(value, el.type)
+          : this.getTrueData(value, el);
+
         Object.defineProperty(filter, key, {
           value: trueData,
           writable: true,
@@ -275,7 +278,7 @@ class Model {
       let value = jsonData[key];
       try {
         if (value !== undefined) {
-          if (el & el.type) {
+          if (el && el.type) {
             this.checkValid(value, el.type, el);
           } else this.checkValid(value, el);
           // chỉ lọc những trường có giá trị được định nghĩa kể cả null
