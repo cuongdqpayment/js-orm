@@ -397,7 +397,7 @@ class NodeDatabase {
   // lệnh chạy trực tiếp câu lệnh sql như create table, update, insert, delete, run function...
   runSql(sql, params = []){
     if (this.db instanceof MongoDAO) {
-      return this.errorPromise("Sorry MongoDB not support run this script!")
+      return this.errorPromise("Sorry MongoDB NOT SUPPORT runSql script!")
     } 
     
     if (this.db !== null) {
@@ -413,7 +413,7 @@ class NodeDatabase {
     if (this.db instanceof OracleDAO) {
       return this.db.executeJavaFunction(func,params)
     }   
-    return this.errorPromise("Sorry this Database sesion NOT SUPPORT for runFunction");
+    return this.errorPromise("Sorry this Database session NOT SUPPORT for runFunction");
   }
 
 }
