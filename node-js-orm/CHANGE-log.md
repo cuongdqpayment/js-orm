@@ -1,4 +1,4 @@
-ver 1.0.8 include README demo
+ver 1.0.9 include README demo
 
 ver 1.0.7 fix bug dir for db sqlite
 

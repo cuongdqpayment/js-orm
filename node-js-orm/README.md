@@ -6,8 +6,7 @@
 npm i node-js-orm@latest cng-node-js-utils
 ```
 
-
-# test demo sqlite for model
+# test demo define model to sqlite db
 ```js
  // define connection
 const connJsonSqlite3 = {
@@ -85,6 +84,50 @@ waiting(20000, { hasData: () => db.isConnected() }).then(async (timeoutMsg) => {
   }
 });
 ```
+
+# test import from excel to db sqlite, copy file from `./node-modules/node-js-orm/excel/sample.excel-2-node-orm.xlsx` into `./db/excel/sample.excel-2-node-orm.xlsx`
+```js
+// define config before use
+const connJsonCfg = {
+    type: "sqlite3",
+    isDebug: true,
+    database: `${__dirname}/db/database/demo-sqlite-from-excel.db`,
+    auto_increment_support: true,
+  };
+
+// define excel with structure
+const excelFile = `./db/excel/sample.excel-2-node-orm.xlsx`
+
+// import components of orm model
+const { database, excell2Database } = require("node-js-orm")
+
+// init db for connection pool
+const db = new database.NodeDatabase(connJsonCfg);
+ 
+const { waiting } = require("cng-node-js-utils");
+waiting(20000, { hasData: () => db.isConnected() })
+    .then(async (timeoutMsg) => {
+        if (!timeoutMsg) {
+            // 1. init model from excel file
+            let models = await excell2Database.createExcel2Models(db, excelFile)
+            console.log("Result of create model:", models.filter(x => x.getName() === "tables").map(x => x.getStructure())[0]);
+            // console.log("Result of create model:", models.map(x => x.getName()));
+ 
+            // 2. Create table and index
+            let resultTable = await excell2Database.createExcel2Tables(models)
+            console.log("Result of create table:", resultTable);
+ 
+            // 3. List tables/sheets to import
+            let tableNames = ["admin_users"]
+ 
+            // 4. Do import into db from sheets of excel listed above 
+            let resultImport = await excell2Database.importExcel2Database(models, excelFile, tableNames, 1)
+            console.log("Resulte of import db:", resultImport);
+ 
+        }
+    });
+```
+
 
 # 1. for project Make your config in `./cfg/orm-conn-cfg.js` with:
 ```js
