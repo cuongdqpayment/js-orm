@@ -3,10 +3,90 @@
 
 # install
 ```sh
-npm i node-js-orm@latest
+npm i node-js-orm@latest cng-node-js-utils
 ```
 
-# 1. Make your config in `./cfg/orm-conn-cfg.js` with:
+
+# test demo sqlite for model
+```js
+ // define connection
+const connJsonSqlite3 = {
+  type: "sqlite3",
+  isDebug: true,
+  database: `${__dirname}/db/database/demo-sqlite.db`,
+  auto_increment_support: true,
+};
+
+// import model
+const { Model, database, json2Model } = require("node-js-orm");
+
+// connect db pool
+const db = new database.NodeDatabase(connJsonSqlite3);
+
+// define model as:
+let jsonStringModel = {
+  id: {
+    type: "INTEGER",
+    notNull: false,
+    primaryKey: true,
+    autoIncrement: true,
+    length: 100,
+  },
+  username: {
+    type: "STRING",
+    notNull: false,
+    isUnique: true,
+    length: 100,
+  },
+  nickname: {
+    type: "STRING",
+    notNull: false,
+    length: 5,
+  },
+  fullname: "STRING",
+  role: {
+    type: "NUMBER",
+    defaultValue: 1,
+  },
+  birth_date: "DATE",
+  log_time: "TIMESTAMP",
+  status: "BOOLEAN",
+};
+
+// convert jsonString to jsonObject for this model
+let jsonObjModel = json2Model.jsonText2Model(jsonStringModel);
+
+// define table for this model
+let tableName = "test_table";
+
+// # ... init model with db
+let model = new Model(db, tableName, jsonObjModel);
+
+
+const { waiting } = require("cng-node-js-utils");
+// waiting for timeout or connected
+waiting(20000, { hasData: () => db.isConnected() }).then(async (timeoutMsg) => {
+  if (!timeoutMsg) {
+    
+    // # create table :
+    let x = await model.sync();
+    console.log("Create table:", x);
+
+    // # insert record into db :
+    let rslt = await model.create({
+      username: "cuongdq",
+    });
+    console.log("result of insert:", rslt);
+    
+    // # read rows from db
+    let rsts = await model.readAll({});
+    console.log("result of select:", rsts);
+
+  }
+});
+```
+
+# 1. for project Make your config in `./cfg/orm-conn-cfg.js` with:
 ```js
 module.exports = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
