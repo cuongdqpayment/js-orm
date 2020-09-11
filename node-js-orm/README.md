@@ -3,7 +3,7 @@
 
 # install
 ```sh
-npm i node-js-orm
+npm i node-js-orm@latest
 ```
 
 # 1. Make your config in `./cfg/orm-conn-cfg.js` with:

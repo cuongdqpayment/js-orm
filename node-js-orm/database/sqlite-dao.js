@@ -22,13 +22,18 @@
  *
  * repaired 20190105: col.value !=undefined && !=null
  */
-const fs = require('fs');
+const fs = require("fs");
 const path = require("path");
 
 class SQLiteDAO {
   constructor(dbFilePath, isDebug) {
     this.isDebug = isDebug;
-    let pathDb = dbFilePath.substring(0, dbFilePath.lastIndexOf(path.sep))
+
+    let pathDb = `${dbFilePath.substring(0, dbFilePath.lastIndexOf(path.sep))}`;
+    
+    console.log("current dir:", __dirname);
+    console.log("path_dir:", pathDb);
+
     if (!fs.existsSync(pathDb)) {
       fs.mkdirSync(pathDb, true);
     }
@@ -99,64 +104,80 @@ class SQLiteDAO {
 
     return new Promise(async (rs, rj) => {
       try {
-        let rsl = await this.runSql(sql)
+        let rsl = await this.runSql(sql);
 
         // sau khi tạo bảng xong, dựa vào cấu trúc của mô hình mà tạo các khóa, các index độc lập tùy kiểu csdl
         for (let key in jsonStructure) {
-          let el = jsonStructure[key]
+          let el = jsonStructure[key];
 
           // nếu cột nào là index đơn lẻ thì tạo kiểu này
           if (el && (el.isUnique || el.isIndex)) {
             // xử lý lỗi bỏ qua ngay nếu có lỗi trên dòng này
-            await this.createIndex(table.name, key, `IDX_${key}_1`, el.isUnique)
-              .catch(e => console.log(`Lỗi tạo index:`, e))
+            await this.createIndex(
+              table.name,
+              key,
+              `IDX_${key}_1`,
+              el.isUnique
+            ).catch((e) => console.log(`Lỗi tạo index:`, e));
           }
-          // nếu cột nào có uniqueKeyMulti = orm_unique_multi thì phải tạo kiểu index nhiều cột 
-          if (el && (el.uniqueKeyMulti)) { // = "table_name, field_name"
-            await this.createIndex(table.name, el.uniqueKeyMulti, `IDX_${key}_2`, true)
-              .catch(e => console.log(`Lỗi tạo unique Index:`, e))
+          // nếu cột nào có uniqueKeyMulti = orm_unique_multi thì phải tạo kiểu index nhiều cột
+          if (el && el.uniqueKeyMulti) {
+            // = "table_name, field_name"
+            await this.createIndex(
+              table.name,
+              el.uniqueKeyMulti,
+              `IDX_${key}_2`,
+              true
+            ).catch((e) => console.log(`Lỗi tạo unique Index:`, e));
           }
           // nếu có cột là el.foreignKey orm_foreign_key thì khai báo contraint foreign key
           // if (el && (el.foreignKey)) { // = " admin_user(id)"
           //   await this.createForeignKey(table.name, key, el.foreignKey, `FK_${key}_3`)
           // .catch(e => console.log(`Lỗi tạo foreign key:`, e))
           // }
-
         }
 
-        rs(rsl)
-      } catch (e) { rj(e) }
-    })
+        rs(rsl);
+      } catch (e) {
+        rj(e);
+      }
+    });
   }
 
   /**
-   * 
-   * @param {*} tableName 
-   * @param {*} constraintFields 
-   * @param {*} referencePrimary 
-   * @param {*} constraintName 
+   *
+   * @param {*} tableName
+   * @param {*} constraintFields
+   * @param {*} referencePrimary
+   * @param {*} constraintName
    */
-  createForeignKey(tableName, constraintFields, referencePrimary, constraintName) {
+  createForeignKey(
+    tableName,
+    constraintFields,
+    referencePrimary,
+    constraintName
+  ) {
     // SQLite doesn't support the ADD CONSTRAINT
     // console.log(`ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName}
-    //             FOREIGN KEY (${constraintFields}) 
+    //             FOREIGN KEY (${constraintFields})
     //             REFERENCES ${referencePrimary}`);
-    return this.runSql(`ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName}
+    return this
+      .runSql(`ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName}
                         FOREIGN KEY (${constraintFields}) 
-                        REFERENCES ${referencePrimary}`)
+                        REFERENCES ${referencePrimary}`);
   }
 
   /**
-   * 
-   * @param {*} tableName 
-   * @param {*} indexFields 
-   * @param {*} isUnique 
-   * @param {*} indexName 
+   *
+   * @param {*} tableName
+   * @param {*} indexFields
+   * @param {*} isUnique
+   * @param {*} indexName
    */
   createIndex(tableName, indexFields, indexName, isUnique) {
-    return this.runSql(`CREATE ${(isUnique ? "UNIQUE" : "")} 
+    return this.runSql(`CREATE ${isUnique ? "UNIQUE" : ""} 
                         INDEX ${indexName} 
-                        ON ${tableName} (${indexFields})`)
+                        ON ${tableName} (${indexFields})`);
   }
 
   //insert
@@ -489,7 +510,8 @@ class SQLiteDAO {
         // This.db sẽ là biến đã kết nối csdl, ta gọi hàm run của this.db chính là gọi hàm run của sqlite3 trong NodeJS hỗ trợ (1 trong 3 hàm như đã nói ở trên)
         if (err) {
           //Trường hợp lỗi
-          if (!this.isDebug) console.log("Could NOT excute: ", sql, params, err);
+          if (!this.isDebug)
+            console.log("Could NOT excute: ", sql, params, err);
           reject(err);
         } else {
           //Trường hợp chạy query thành công
