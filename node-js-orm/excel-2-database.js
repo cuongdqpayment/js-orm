@@ -60,8 +60,6 @@ const createExcel2Models = (db, excelFilename, sheetName = SHEET_CFG, headerCfg 
             for (let tablename in jsonTextModels) {
                 // lấy lại cấu hình mô hình từng bảng
                 let textModel = jsonTextModels[tablename];
-                // có thể in mô hình này ra, copy vào model của dự án để không phải đọc lại từ excel
-                console.log(`TABLE_name = ${tablename}:`, textModel);
                 // chuyển đổi kiểu mô hình DataTypes
                 let jsonTableModel = jsonText2Model(textModel);
                 result.table_models.push(new Model(db, tablename, jsonTableModel))

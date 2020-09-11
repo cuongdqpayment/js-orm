@@ -1,12 +1,12 @@
 ### ORM for javascript with sqlite3, oracle, mongodb
 ## Use with node 12.9 or later for Promise.allSettled
 
-# install
+# 1. install
 ```sh
 npm i node-js-orm@latest cng-node-js-utils
 ```
 
-# test demo define model to sqlite db
+# 2. test demo define model to sqlite db
 ```js
  // define connection
 const connJsonSqlite3 = {
@@ -85,7 +85,7 @@ waiting(20000, { hasData: () => db.isConnected() }).then(async (timeoutMsg) => {
 });
 ```
 
-# test import from excel to db sqlite, copy file from `./node-modules/node-js-orm/excel/sample.excel-2-node-orm.xlsx` into `./db/excel/sample.excel-2-node-orm.xlsx`
+# 3. test import from excel to db sqlite, copy file from `./node-modules/node-js-orm/excel/sample.excel-2-node-orm.xlsx` into `./db/excel/sample.excel-2-node-orm.xlsx`
 ```js
 // define config before use
 const connJsonCfg = {
@@ -128,8 +128,28 @@ waiting(20000, { hasData: () => db.isConnected() })
     });
 ```
 
+# 4. Extract excel sheet tables to json Text model for define model
+```js
+// excel file include the model structure in tables sheet 
+const excelFile = `./db/excel/sample.excel-2-node-orm.xlsx`;
+// import components of orm model
+const { excell2Database, json2Model } = require("node-js-orm");
 
-# 1. for project Make your config in `./cfg/orm-conn-cfg.js` with:
+// read excel `tables` sheet into array and convert into model text json
+excell2Database.excel2Array(excelFile)
+    .then(arrayTables => {
+        let jsonTextModel = json2Model.array2JsonTexts(arrayTables);
+        console.log('jsonTextModel: ', jsonTextModel);
+        // convert jsonString to jsonObject for this model
+        // let jsonObjModel = json2Model.jsonText2Model(jsonTextModel);
+    })
+    .catch(err => {
+        console.log('Lỗi: ', err);
+    });
+``` 
+
+
+# 5. for project Make your config in `./cfg/orm-conn-cfg.js` with:
 ```js
 module.exports = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
@@ -156,7 +176,7 @@ module.exports = {
 }
 ```
 
-# 2. install driver for db:
+# 6. install driver for db:
 ```sh
 npm i sqlite3
 # or
@@ -164,7 +184,8 @@ npm i oracle
 # or
 npm i mongodb
 ```
-# 3. Use with json for define model:
+
+# 7. Use with json for define model:
 ```json
 let jsonData = 
 {
@@ -311,7 +332,7 @@ let rslt = await model.create({
 let rst = await model.readAll({});
 ```
 
-# 4. Use excel for define model. The sample in excel at sheet `tables`. To make table with model.sync()
+# 8. Use excel for define model. The sample in excel at sheet `tables`. To make table with model.sync()
 
 - The sample for excel: `./node-js-orm/excel/sample.excel-2-node-orm.xlsx` at sheet tables
 
@@ -354,4 +375,81 @@ waiting(20000, { hasData: () => db.isConnected() })
     });
 ```
 
-# 5. When db created, no need model, we use only db for insert, update, delete, select and runSql,...
+# 9. When db created, no need model, we use only db for insert, update, delete, select and runSql,...
+
+```js
+// khai báo thư viện dùng chung, cài đặt thư viện trước khi dùng
+const { waiting } = require("cng-node-js-utils");
+
+// khai báo file cấu hình trước khi dùng
+const connJsonSqlite3 = {
+  type: "sqlite3",
+  isDebug: true,
+  database: `${__dirname}/db/database/demo-sqlite-from-excel.db`,
+  auto_increment_support: true,
+};
+
+// nhúng gói giao tiếp csdl và mô hình vào
+const { database } = require("node-js-orm");
+// khởi tạo kết nối csdl để giao tiếp
+const db = new database.NodeDatabase(connJsonSqlite3);
+
+// khai báo tên bảng để truy vấn dữ liệu,
+let tableName = "tables";
+
+// khởi tạo hàm thời gian chờ kết nối csdl hoặc quá thời gian mà csdl không kết nối được
+waiting(20000, { hasData: () => db.isConnected() }).then(async (timeoutMsg) => {
+    if (!timeoutMsg) {
+
+        // # insert db
+        let iRslt = await db.insertOne(tableName, { table_name: "test", field_name: "abc", orm_data_type: "INTEGER" })
+        console.log("result of insert", iRslt);
+
+        // # read rows from db
+        let rsts = await db.selectAll(
+            tableName,
+            {},
+            { table_name: 1, field_name: 1 }
+        );
+        // == select table_name, field_name from tables 
+        console.log("result of select:", rsts);
+
+        // # select one record
+        let rst1 = await db.selectOne(
+            tableName,
+            {},
+            { table_name: 1, field_name: 1 }
+        );
+        // == select table_name, field_name from tables 
+        console.log("result of select 1:", rst1);
+
+        // // # the same old sql
+        db.getRsts(`select table_name, field_name from ${tableName}`)
+            .then(data => {
+                console.log('Data: ', data);
+            })
+            .catch(err => {
+                console.log('Lỗi: ', err);
+            });
+
+        // # run excute sql 
+        db.runSql(`update tables set field_name=? where table_name=?`, ["efc", "test"])
+            .then(data => {
+                console.log('Data: ', data);
+
+                db.getRst(`select table_name, field_name from ${tableName} where table_name='test'`)
+                    .then(data => {
+                        console.log('Data: ', data);
+                    })
+                    .catch(err => {
+                        console.log('Lỗi: ', err);
+                    });
+
+
+            })
+            .catch(err => {
+                console.log('Lỗi: ', err);
+            });
+    }
+});
+```

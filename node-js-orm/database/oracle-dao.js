@@ -874,8 +874,10 @@ class OracleDAO {
    * giả lập gọi hàm như khi gọi trong oracle
    * functionName, [list value of param]
    * ví dụ: let outPut = await db.executeJavaFunction("the_pkg.the_my_function",["value1 for param1", "value2 for param2",...])
-   * @param {*} oracleFunctionName
-   * @param {*} params
+   * === execute the_pkg.the_my_function(value1_for_param1,value2_for_param2)
+   * @param {*} oracleFunctionName // tên hàm không dùng dấu ()
+   * @param {*} params //các tham số đưa vào
+   * out put: là kết quả của hàm trong oracle trả về cho nó
    */
   executeJavaFunction(oracleFunctionName, params = []) {
     //ham tra ve ket qua la mot json gia tri

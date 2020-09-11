@@ -21,15 +21,12 @@
   "author": "cuong.dq",
   "license": "ISC",
   "dependencies": {
-    "crypto-js": "^4.0.0",
-    "formidable": "^1.2.2",
-    "ldapjs": "^2.1.1",
+    "cng-node-js-utils": "0.0.1",
     "mongodb": "^3.6.1",
     "oracledb": "^5.0.0",
     "os": "^0.1.1",
     "path": "^0.12.7",
     "promise.allsettled": "^1.0.2",
-    "simple-crypto-js": "^3.0.0",
     "sqlite3": "^5.0.0",
     "xlsx-to-json-lc": "^0.5.0"
   }

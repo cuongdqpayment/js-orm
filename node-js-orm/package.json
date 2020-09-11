@@ -1,6 +1,6 @@
 {
   "name": "node-js-orm",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Library for model of database and javascript",
   "repository": "https://github.com/cuongdqpayment/js-orm.git",
   "main": "index.js",
@@ -11,16 +11,9 @@
   "author": "cuong.dq",
   "license": "ISC",
   "dependencies": {
-    "crypto-js": "^4.0.0",
-    "formidable": "^1.2.2",
-    "ldapjs": "^2.1.1",
-    "mongodb": "^3.6.1",
-    "oracledb": "^5.0.0",
     "os": "^0.1.1",
     "path": "^0.12.7",
-    "promise.allsettled": "^1.0.2",
-    "simple-crypto-js": "^3.0.0",
-    "sqlite3": "^5.0.0",
+    "promise.allsettled": "^1.0.2", 
     "xlsx-to-json-lc": "^0.5.0"
   }
 }

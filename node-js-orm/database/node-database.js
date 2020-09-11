@@ -365,5 +365,57 @@ class NodeDatabase {
     }
     return { name: tableName, cols };
   }
+
+  // ------- Các hàm chạy lệnh trực tiếp trong csdl -------
+
+  // Hàm lấy 1 bảng ghi qua câu lệnh sql như cũ
+  getRst(sql, params = []){
+    if (this.db instanceof MongoDAO) {
+      return this.errorPromise("Sorry MongoDB not support run this script!")
+    } 
+    
+    if (this.db !== null) {
+      return this.db.getRst(sql, params)
+    } 
+    
+    return this.errorPromise();
+  }
+
+  // lệnh lấy tất cả bảng ghi qua câu lệnh sql
+  getRsts(sql, params = []){
+    if (this.db instanceof MongoDAO) {
+      return this.errorPromise("Sorry MongoDB not support run this script!")
+    } 
+    
+    if (this.db !== null) {
+      return this.db.getRsts(sql, params)
+    } 
+    
+    return this.errorPromise();
+  }
+
+  // lệnh chạy trực tiếp câu lệnh sql như create table, update, insert, delete, run function...
+  runSql(sql, params = []){
+    if (this.db instanceof MongoDAO) {
+      return this.errorPromise("Sorry MongoDB not support run this script!")
+    } 
+    
+    if (this.db !== null) {
+      return this.db.runSql(sql, params)
+    } 
+    
+    return this.errorPromise();
+  }
+
+
+  // lệnh chạy hàm trong oracle
+  runFunction(func, params = []){
+    if (this.db instanceof OracleDAO) {
+      return this.db.executeJavaFunction(func,params)
+    }   
+    return this.errorPromise("Sorry this Database sesion NOT SUPPORT for runFunction");
+  }
+
 }
+
 module.exports = NodeDatabase;
