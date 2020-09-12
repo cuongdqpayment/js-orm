@@ -1,3 +1,5 @@
+ver 1.1.1 fix isDebug for SqliteDAO
+
 ver 1.1.0 db.getRst(s) and db.runFunction
 
 ver 1.0.9 include README demo
