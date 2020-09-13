@@ -236,7 +236,9 @@ class NodeDatabase {
   // update theo mệnh đề where
   updateWhere(tableName, jsonData = {}, jsonWhere = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.update(tableName, jsonWhere, jsonData);
+      // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
+      // tuy nhiên phù hợp với csdl sql khác thì nó có update tất cả bảng ghi thỏa điều kiện
+      return this.db.updates(tableName, jsonWhere, jsonData);
     } else if (this.db !== null) {
       return this.db.update(
         this.convertDaoFromMongo(tableName, jsonWhere, jsonData)

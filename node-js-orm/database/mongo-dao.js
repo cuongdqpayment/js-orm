@@ -281,7 +281,7 @@ class MongoDAO {
         try {
           let rtn = await this.db
             .collection(tableName)
-            .updateOne(jsonWhere, jsonData, jsonOption);
+            .updateOne(jsonWhere, { $set: { ...jsonData } }, jsonOption);
           rs(rtn.result);
         } catch (e) {
           rj(e);
@@ -303,7 +303,7 @@ class MongoDAO {
         try {
           let rtn = await this.db
             .collection(tableName)
-            .updateMany(jsonWhere, jsonData, jsonOption);
+            .updateMany(jsonWhere, { $set: { ...jsonData } }, jsonOption);
           rs(rtn.result);
         } catch (e) {
           rj(e);

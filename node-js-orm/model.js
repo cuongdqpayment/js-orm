@@ -82,6 +82,14 @@ class Model {
     return this.tableName
   }
 
+
+  /**
+   * Trả db của chính nó
+   */
+  getDb() {
+    return this.db
+  }
+
   /**
    * Tạo bảng nếu chưa có, hoặc lấy dữ liệu về
    * @param {*} jsonWhere

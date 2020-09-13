@@ -1,3 +1,5 @@
+ver 1.1.2 fix update on MongoDb for $set and many
+
 ver 1.1.1 fix isDebug for SqliteDAO
 
 ver 1.1.0 db.getRst(s) and db.runFunction
