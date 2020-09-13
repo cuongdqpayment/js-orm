@@ -160,6 +160,10 @@ waiting(20000, { hasData: () => db.isConnected() })
     });
 ```
 
+# Các mô hình test
+```sh
+node ./test/test-node-orm-sqlite-string.js
+```
 
 ## -- Xuất bản npm publish
 ```sh

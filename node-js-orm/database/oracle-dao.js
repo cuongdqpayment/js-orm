@@ -125,9 +125,9 @@ class OracleDAO {
         if (typeof this.pool !== "undefined") {
           console.log(
             "INFO: Connections in use/Connections open: " +
-              this.pool.connectionsInUse +
-              "/" +
-              this.pool.connectionsOpen
+            this.pool.connectionsInUse +
+            "/" +
+            this.pool.connectionsOpen
           );
         }
 
@@ -217,18 +217,18 @@ class OracleDAO {
             if (e.option_index === "UNIQUE" || e.option_index === "INDEX") {
               createIndexs.push(
                 "CREATE " +
-                  (e.option_index === "UNIQUE" ? "UNIQUE" : "") +
-                  "\
+                (e.option_index === "UNIQUE" ? "UNIQUE" : "") +
+                "\
                                           INDEX idx_" +
-                  el +
-                  "_" +
-                  ++idx +
-                  "\
+                el +
+                "_" +
+                ++idx +
+                "\
                                           ON " +
-                  el +
-                  "(" +
-                  e.field_name +
-                  ")"
+                el +
+                "(" +
+                e.field_name +
+                ")"
               );
             }
           });
@@ -677,8 +677,7 @@ class OracleDAO {
     if (selectTable.orderbys) {
       let order_by = "";
       for (let col of selectTable.orderbys)
-        order_by =
-          (order_by ? col.name : ", " + col.name) +
+        order_by = (order_by ? ", " + col.name : col.name) +
           (col.value ? " " + col.value : "");
       if (order_by) sql += ` ORDER BY ${order_by}`;
     }
@@ -779,8 +778,7 @@ class OracleDAO {
     if (selectTable.orderbys) {
       let order_by = "";
       for (let col of selectTable.orderbys)
-        order_by =
-          (order_by ? col.name : ", " + col.name) +
+        order_by = (order_by ? ", " + col.name : col.name) +
           (col.value ? " " + col.value : "");
       if (order_by) sql += ` ORDER BY ${order_by}`;
     }

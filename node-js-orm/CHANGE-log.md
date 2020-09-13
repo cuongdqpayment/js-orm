@@ -1,3 +1,5 @@
+ver 1.1.3 fix sort for sqlite and oracle
+
 ver 1.1.2 fix update on MongoDb for $set and many
 
 ver 1.1.1 fix isDebug for SqliteDAO

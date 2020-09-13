@@ -30,7 +30,7 @@ class SQLiteDAO {
     this.isDebug = isDebug;
 
     let pathDb = `${dbFilePath.substring(0, dbFilePath.lastIndexOf(path.sep))}`;
-    
+
     console.log("current dir:", __dirname);
     console.log("path_dir:", pathDb);
 
@@ -387,14 +387,12 @@ class SQLiteDAO {
     if (selectTable.orderbys) {
       let order_by = "";
       for (let col of selectTable.orderbys)
-        order_by =
-          (order_by ? col.name : ", " + col.name) +
+        order_by = (order_by ? ", " + col.name : col.name) +
           (col.value ? " " + col.value : "");
       if (order_by) sql += ` ORDER BY ${order_by}`;
     }
-
-    //console.log(sql);
-    //console.log(params);
+    // console.log("Câu sql:", sql);
+    // console.log("Tham số", params);
     return this.getRst(sql, params);
   }
 
@@ -448,8 +446,7 @@ class SQLiteDAO {
     if (selectTable.orderbys) {
       let order_by = "";
       for (let col of selectTable.orderbys)
-        order_by =
-          (order_by ? col.name : ", " + col.name) +
+        order_by = (order_by ? ", " + col.name : col.name) +
           (col.value ? " " + col.value : "");
       if (order_by) sql += ` ORDER BY ${order_by}`;
     }
