@@ -1,4 +1,4 @@
-ver 1.1.7 fix create table PRIMARY_KEY in oracle 12 with AUTO INCREMENT
+ver 1.1.8 fix create table PRIMARY_KEY in oracle 12 with AUTO INCREMENT
 
 ver 1.1.3 fix sort for sqlite and oracle
 
