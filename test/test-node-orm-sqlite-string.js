@@ -74,7 +74,7 @@ waiting(20000, { hasData: () => db.isConnected() }).then(
                     role: '99',
                     birth_date: Date.now(),
                     log_time: Date.now(),
-                    status: -1
+                    status: 'x'
                 });
                 console.log("Kết quả chèn dữ liệu", rslt);
 
