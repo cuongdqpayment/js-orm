@@ -359,9 +359,12 @@ class NodeDatabase {
               : this.db instanceof OracleDAO
                 ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
                 : ``
-          }${el.notNull ? ` NOT NULL` : ``}${el.isUnique ? ` UNIQUE` : ``}${
-          el.defaultValue ? ` default ${el.defaultValue}${el.primaryKey ? ` PRIMARY KEY` : ``}` : ``
-          }`;
+          }
+          ${el.notNull ? ` NOT NULL` : ``}
+          ${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}
+          ${el.defaultValue ? ` default ${el.defaultValue}` : ``}
+          ${el.primaryKey ? ` PRIMARY KEY` : ``}
+          `;
         cols.push({ name: key, type: el.type, option_key: opts });
       } else cols.push({ name: key, type: el });
     }
@@ -371,50 +374,50 @@ class NodeDatabase {
   // ------- Các hàm chạy lệnh trực tiếp trong csdl -------
 
   // Hàm lấy 1 bảng ghi qua câu lệnh sql như cũ
-  getRst(sql, params = []){
+  getRst(sql, params = []) {
     if (this.db instanceof MongoDAO) {
       return this.errorPromise("Sorry MongoDB not support run this script!")
-    } 
-    
+    }
+
     if (this.db !== null) {
       return this.db.getRst(sql, params)
-    } 
-    
+    }
+
     return this.errorPromise();
   }
 
   // lệnh lấy tất cả bảng ghi qua câu lệnh sql
-  getRsts(sql, params = []){
+  getRsts(sql, params = []) {
     if (this.db instanceof MongoDAO) {
       return this.errorPromise("Sorry MongoDB not support run this script!")
-    } 
-    
+    }
+
     if (this.db !== null) {
       return this.db.getRsts(sql, params)
-    } 
-    
+    }
+
     return this.errorPromise();
   }
 
   // lệnh chạy trực tiếp câu lệnh sql như create table, update, insert, delete, run function...
-  runSql(sql, params = []){
+  runSql(sql, params = []) {
     if (this.db instanceof MongoDAO) {
       return this.errorPromise("Sorry MongoDB NOT SUPPORT runSql script!")
-    } 
-    
+    }
+
     if (this.db !== null) {
       return this.db.runSql(sql, params)
-    } 
-    
+    }
+
     return this.errorPromise();
   }
 
 
   // lệnh chạy hàm trong oracle
-  runFunction(func, params = []){
+  runFunction(func, params = []) {
     if (this.db instanceof OracleDAO) {
-      return this.db.executeJavaFunction(func,params)
-    }   
+      return this.db.executeJavaFunction(func, params)
+    }
     return this.errorPromise("Sorry this Database session NOT SUPPORT for runFunction");
   }
 
