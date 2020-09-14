@@ -359,11 +359,7 @@ class NodeDatabase {
               : this.db instanceof OracleDAO
                 ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
                 : ``
-          }
-          ${el.notNull ? ` NOT NULL` : ``}
-          ${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}
-          ${el.defaultValue ? ` default ${el.defaultValue}` : ``}
-          ${el.primaryKey ? ` PRIMARY KEY` : ``}
+          }${el.notNull ? ` NOT NULL` : ``}${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}${el.defaultValue ? ` default ${el.defaultValue}` : ``}${el.primaryKey ? ` PRIMARY KEY` : ``}
           `;
         cols.push({ name: key, type: el.type, option_key: opts });
       } else cols.push({ name: key, type: el });
