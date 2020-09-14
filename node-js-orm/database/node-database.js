@@ -350,17 +350,17 @@ class NodeDatabase {
     for (let key in jsonStructure) {
       let el = jsonStructure[key];
       if (el && el.type) {
-        let opts = `${el.primaryKey ? `PRIMARY KEY` : ``}${
+        let opts = `${
           // nếu csdl nào không hổ trợ thì tắt nó đi và sử dụng mô hình model để tạo id tự động
           !el.autoIncrement || !this.cfg.auto_increment_support
             ? ``
             : this.db instanceof SQLiteDAO
-              ? ` AUTOINCREMENT`
+              ? ` AUTO INCREMENT`
               : this.db instanceof OracleDAO
                 ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
                 : ``
           }${el.notNull ? ` NOT NULL` : ``}${el.isUnique ? ` UNIQUE` : ``}${
-          el.defaultValue ? ` default ${el.defaultValue}` : ``
+          el.defaultValue ? ` default ${el.defaultValue}${el.primaryKey ? ` PRIMARY KEY` : ``}` : ``
           }`;
         cols.push({ name: key, type: el.type, option_key: opts });
       } else cols.push({ name: key, type: el });
