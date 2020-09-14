@@ -1,4 +1,4 @@
-ver 1.1.9 fix data type boolean input number is not error
+ver 1.1.10 fix data type boolean input number is not error
 
 ver 1.1.8 fix create table PRIMARY_KEY in oracle 12 with AUTO INCREMENT
 

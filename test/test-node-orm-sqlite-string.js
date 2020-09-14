@@ -65,18 +65,18 @@ waiting(20000, { hasData: () => db.isConnected() }).then(
 
             // thực hiện tạo bảng user trong csdl bằng cách gọi lệnh
             try {
-                // let x = await user.sync();
-                // console.log("Tạo ??", x);
-                // // bảng user đã được tạo
-                // let rslt = await user.create({
-                //     username: 'cuongdq4',
-                //     nickname: '12349',
-                //     role: '99',
-                //     birth_date: Date.now(),
-                //     log_time: Date.now(),
-                //     status: true
-                // });
-                // console.log("Kết quả chèn dữ liệu", rslt);
+                let x = await user.sync();
+                console.log("Tạo ??", x);
+                // bảng user đã được tạo
+                let rslt = await user.create({
+                    username: 'cuongdq_y',
+                    nickname: '12349',
+                    role: '99',
+                    birth_date: Date.now(),
+                    log_time: Date.now(),
+                    status: -1
+                });
+                console.log("Kết quả chèn dữ liệu", rslt);
 
                 let rst = await user.readAll({},{username:1},{username:-1});
                 console.log("Kết quả dữ liệu", rst);

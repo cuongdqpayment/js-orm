@@ -36,20 +36,22 @@ class DataType {
      * @param {*} opts 
      */
     isValid(value, opts) {
-        // console.log("Validate", typeof value, this.types.js, opts, isNaN(value));
         if (typeof value !== this.types.js
             && (
-                (this.types.js !== "number" && this.types.js !== "string")
+                (this.types.js !== "boolean" && this.types.js !== "number" && this.types.js !== "string")
                 // kiểu số mà đưa vào chuỗi không đổi được số thì đưa ra lỗi
                 || (this.types.js === "number" && isNaN(value))
                 // kiểu chuỗi mà đưa vào không phải số cũng không phải chuỗi thì lỗi
                 || (this.types.js === "string" && typeof value !== "number")
                 // kiểu js là boolean, kiểu dữ liệu đưa vào là không phải là số cũng báo lỗi
                 || (this.types.js === "boolean" && typeof value !== "number")
-                
             )
-        )
+        ) {
+            // console.log("*** VALIDATE ERROR:", this.types.js, typeof value, this.types.js === "boolean" && typeof value !== "number");
+            // console.log("*** VALIDATE ERROR:", typeof value, this.types.js, opts, isNaN(value));
             throw `${value} IS NOT ${this.types.js}`
+        }
+
         if (opts && opts.length && value && value.length > opts.length)
             throw `${value} WITH LENGTH ${value.length}>${opts.length}`
         return true;
