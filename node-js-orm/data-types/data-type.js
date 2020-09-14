@@ -44,6 +44,9 @@ class DataType {
                 || (this.types.js === "number" && isNaN(value))
                 // kiểu chuỗi mà đưa vào không phải số cũng không phải chuỗi thì lỗi
                 || (this.types.js === "string" && typeof value !== "number")
+                // kiểu js là boolean, kiểu dữ liệu đưa vào là không phải là số cũng báo lỗi
+                || (this.types.js === "boolean" && typeof value !== "number")
+                
             )
         )
             throw `${value} IS NOT ${this.types.js}`

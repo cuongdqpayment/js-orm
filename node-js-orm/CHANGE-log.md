@@ -1,3 +1,5 @@
+ver 1.1.9 fix data type boolean input number is not error
+
 ver 1.1.8 fix create table PRIMARY_KEY in oracle 12 with AUTO INCREMENT
 
 ver 1.1.3 fix sort for sqlite and oracle
