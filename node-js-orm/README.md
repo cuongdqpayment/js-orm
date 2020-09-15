@@ -453,3 +453,60 @@ waiting(20000, { hasData: () => db.isConnected() }).then(async (timeoutMsg) => {
     }
 });
 ```
+
+# Make Models Easy:
+
+- 1. Define Models in `json-text-model.js` such as
+```js
+module.exports = {
+  // one model with name your_table_name as table_name in db
+    your_table_name: {
+        username: { type: 'STRING', notNull: '1', isUnique: '1' },
+        function_groups: { type: 'STRING' },
+        function_apis: { type: 'STRING' },
+        updated_time: { type: 'DATETIME' },
+        updated_user: { type: 'STRING' },
+        status: { type: 'BOOLEAN' }
+    }
+  // ... and more models ...
+}
+```
+
+- 3 define connection pool following in `./db/db-connection-pool.js`
+```js
+const connJsonCfg = {
+    type: "sqlite3",
+    isDebug: true,
+    database: `${__dirname}/database/admin-users.db`,
+    auto_increment_support: true,
+};
+// import components of orm model
+const { database } = require("node-js-orm");
+// init db for connection pool
+module.exports = new database.NodeDatabase(connJsonCfg);
+```
+
+- 2. Define Your Model following:
+```js
+// table name in db
+const tableName = "your_table_name";
+// import text object of model
+const { your_table_name } = require("./json-text-models")
+// import from lib
+const { Model, json2Model } = require("node-js-orm");
+// define connection to db pool - see 
+const db = require("./db/db-connection-pool");
+
+// define your Model such as
+class YourModelName extends Model() {
+    constructor(db, tableName, model) {
+        // call parent..
+        super(db, tableName, model);
+    }
+    // make your method in here
+
+}
+
+// Export your model to app
+module.exports = new YourModelName(db, tableName, json2Model.jsonText2Model(your_table_name))
+```
