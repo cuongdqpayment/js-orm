@@ -18,7 +18,7 @@ const { database } = require("../index")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonSqlite3);
 
-const { waiting } = require("../../utils");
+const { waiting } = require("cng-node-js-utils");
 
 waiting(20000, { hasData: () => db.isConnected() }).then(
     async (timeoutMsg) => {

@@ -6,10 +6,10 @@ const DataType = require("./data-type")
 class STRING extends DataType {
     constructor() {
         super({
-            js: DataType.mapType.STRING[0],
-            sqlite: DataType.mapType.STRING[1],
-            oracle: DataType.mapType.STRING[2],
-            mongodb: DataType.mapType.STRING[3]
+            js: DataType.mapType().STRING[0],
+            sqlite: DataType.mapType().STRING[1],
+            oracle: DataType.mapType().STRING[2],
+            mongodb: DataType.mapType().STRING[3]
         })
     }
 }

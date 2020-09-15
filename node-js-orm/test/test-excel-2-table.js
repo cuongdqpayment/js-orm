@@ -8,7 +8,7 @@ const { database, excell2Database } = require("../index");
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);
 
-const { waiting } = require("../../utils");
+const { waiting } = require("cng-node-js-utils");
 
 waiting(20000, { hasData: () => db.isConnected() })
     .then(async (timeoutMsg) => {

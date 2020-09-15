@@ -5,10 +5,10 @@ const DataType = require("./data-type")
 class DATETIME extends DataType {
     constructor() {
         super({
-            js: DataType.mapType.DATETIME[0],
-            sqlite: DataType.mapType.DATETIME[1],
-            oracle: DataType.mapType.DATETIME[2],
-            mongodb: DataType.mapType.DATETIME[3]
+            js: DataType.mapType().DATETIME[0],
+            sqlite: DataType.mapType().DATETIME[1],
+            oracle: DataType.mapType().DATETIME[2],
+            mongodb: DataType.mapType().DATETIME[3]
         })
     }
 
@@ -23,12 +23,12 @@ class DATETIME extends DataType {
     */
     getTrueData(value, dbType) {
         let customeDate = new Date(value);
-        if (dbType === DataType.mapType.dbTypes[0]) return customeDate
+        if (dbType === DataType.mapType().dbTypes[0]) return customeDate
         let yyyy_mm_dd = ("" + customeDate.getFullYear()).padStart(4, 0) + "-" + ("" + (customeDate.getMonth() + 1)).padStart(2, 0) + "-" + ("" + customeDate.getDate()).padStart(2, 0)
         let hh_mi_ss = ("" + customeDate.getHours()).padStart(2, 0) + ":" + ("" + customeDate.getMinutes()).padStart(2, 0) + ":" + ("" + customeDate.getSeconds()).padStart(2, 0)
-        if (dbType === DataType.mapType.dbTypes[1]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
-        if (dbType === DataType.mapType.dbTypes[2]) return `__$to_date('${yyyy_mm_dd} ${hh_mi_ss}','yyyy-mm-dd hh24:mi:ss')`
-        if (dbType === DataType.mapType.dbTypes[3]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
+        if (dbType === DataType.mapType().dbTypes[1]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
+        if (dbType === DataType.mapType().dbTypes[2]) return `__$to_date('${yyyy_mm_dd} ${hh_mi_ss}','yyyy-mm-dd hh24:mi:ss')`
+        if (dbType === DataType.mapType().dbTypes[3]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
         return `${yyyy_mm_dd} ${hh_mi_ss}`
     }
 }
