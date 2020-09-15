@@ -1,3 +1,5 @@
+ver 1.1.16 make help use models
+
 ver 1.1.15 fix create sqlite index
 
 ver 1.1.12 static for method not parameter and boolean type for input string and number for =  null, undefine off, false, -1 is = 0 else 1
