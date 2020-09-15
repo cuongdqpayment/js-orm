@@ -1,3 +1,5 @@
+ver 1.1.15 fix create sqlite index
+
 ver 1.1.12 static for method not parameter and boolean type for input string and number for =  null, undefine off, false, -1 is = 0 else 1
 
 ver 1.1.11 fix data type boolean input number is not error
