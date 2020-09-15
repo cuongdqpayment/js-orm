@@ -116,7 +116,7 @@ class SQLiteDAO {
             await this.createIndex(
               table.name,
               key,
-              `IDX_${key}_1`,
+              `IDX_${table.name}_${key}_1`,
               el.isUnique
             ).catch((e) => console.log(`Lỗi tạo index:`, e));
           }
@@ -126,7 +126,7 @@ class SQLiteDAO {
             await this.createIndex(
               table.name,
               el.uniqueKeyMulti,
-              `IDX_${key}_2`,
+              `IDX_${table.name}_${key}_2`,
               true
             ).catch((e) => console.log(`Lỗi tạo unique Index:`, e));
           }

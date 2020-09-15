@@ -216,19 +216,7 @@ class OracleDAO {
             // Kiểm tra nếu yêu cầu tạo index thì tạo câu lệnh tạo index độc lập riêng
             if (e.option_index === "UNIQUE" || e.option_index === "INDEX") {
               createIndexs.push(
-                "CREATE " +
-                (e.option_index === "UNIQUE" ? "UNIQUE" : "") +
-                "\
-                                          INDEX idx_" +
-                el +
-                "_" +
-                ++idx +
-                "\
-                                          ON " +
-                el +
-                "(" +
-                e.field_name +
-                ")"
+                `CREATE ${(e.option_index === "UNIQUE" ? "UNIQUE" : "")} INDEX idx_${el}_${++idx} ON ${el} (${e.field_name})`
               );
             }
           });
@@ -242,7 +230,7 @@ class OracleDAO {
             for (let i = 0; i < createIndexs.length; i++) {
               //thực hiện tạo index sau khi tạo bảng thành công
               await this.runSql(createIndexs[i]);
-              console.log("index created: ", "idx_" + el + "_" + i);
+              console.log("index created: ", `idx_${el}_${i}`);
             }
             // ghi nhận bảng đã tạo xong
             tables_created.push(el);
