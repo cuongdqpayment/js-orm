@@ -29,10 +29,11 @@ class SQLiteDAO {
   constructor(dbFilePath, isDebug) {
     this.isDebug = isDebug;
 
-    let pathDb = `${dbFilePath.substring(0, dbFilePath.lastIndexOf(path.sep))}`;
+    let pathDb = `${dbFilePath.substring(0, dbFilePath.lastIndexOf("/"))}`;
 
-    console.log("current dir:", __dirname);
-    console.log("path_dir:", pathDb);
+    console.log("DB_FILE_INPUT:", dbFilePath);
+    console.log("CURRENT_DIR:", __dirname);
+    console.log("PATH_DIR:", pathDb);
 
     if (!fs.existsSync(pathDb)) {
       fs.mkdirSync(pathDb, true);

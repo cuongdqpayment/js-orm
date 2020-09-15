@@ -55,13 +55,13 @@ class Model {
     this.tableStructure = jsonDefine;
     this.db = database;
     this.tableName = tbName;
-    this.dbType = dataTypes.DataType.mapType.dbTypes[0]; // js
+    this.dbType = dataTypes.DataType.mapType().dbTypes[0]; // js
     if (this.db.getDbInstance() instanceof SQLiteDAO)
-      this.dbType = dataTypes.DataType.mapType.dbTypes[1];
+      this.dbType = dataTypes.DataType.mapType().dbTypes[1];
     if (this.db.getDbInstance() instanceof OracleDAO)
-      this.dbType = dataTypes.DataType.mapType.dbTypes[2];
+      this.dbType = dataTypes.DataType.mapType().dbTypes[2];
     if (this.db.getDbInstance() instanceof MongoDAO)
-      this.dbType = dataTypes.DataType.mapType.dbTypes[3];
+      this.dbType = dataTypes.DataType.mapType().dbTypes[3];
   }
 
   /**

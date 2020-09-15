@@ -1,11 +1,10 @@
 // ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
-const connJsonSqlite3 = require("../cfg/orm-sqlite-cfg")
-/* {
+const connJsonSqlite3 ={
     type: "sqlite3",
     isDebug: true,
-    database: "./db/database/test-model.db",
+    database: "./test/database/test-model.db",
     auto_increment_support: true,
-} */;
+} ;
 
 // nhúng gói giao tiếp csdl và mô hình vào
 const { Model, DataTypes, database } = require("../node-js-orm")

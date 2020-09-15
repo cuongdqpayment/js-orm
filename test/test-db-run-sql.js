@@ -5,9 +5,9 @@ const { waiting } = require("cng-node-js-utils");
 const connJsonSqlite3 = {
     type: "sqlite3",
     isDebug: true,
-    database: `${__dirname}/database/demo-sqlite-from-excel.db`,
+    database: "./test/database/test-model.db",
     auto_increment_support: true,
-};
+} ;
 
 // nhúng gói giao tiếp csdl và mô hình vào
 const { database } = require("../node-js-orm");

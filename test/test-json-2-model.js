@@ -25,7 +25,12 @@ let jsonCfg = {
 
 
 // ví dụ khai báo một csdl như sau: ví dụ mở kết nối csdl thử
-const connJsonCfg = require("../cfg/orm-sqlite-cfg")
+const connJsonCfg =  {
+  type: "sqlite3",
+  isDebug: true,
+  database: "./test/database/test-model.db",
+  auto_increment_support: true,
+} ;
 // const connJsonCfg = require("../cfg/orm-mongodb-cfg")
 // khai báo và kết nối csdl để giao tiếp
 const db = new database.NodeDatabase(connJsonCfg);

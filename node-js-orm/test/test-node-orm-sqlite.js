@@ -14,7 +14,7 @@ const db = new database.NodeDatabase(connJsonSqlite3);
 
 const model = require("./json-model")
 
-const { waiting } = require("../../utils");
+const { waiting } = require("cng-node-js-utils");
 
 waiting(20000, { hasData: () => db.isConnected() }).then((timeoutMsg) => {
     // console.log("kết nối", db.isConnected());

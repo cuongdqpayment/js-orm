@@ -6,10 +6,10 @@ const DataType = require("./data-type")
 class TIMESTAMP extends DataType {
     constructor() {
         super({
-            js: DataType.mapType.TIMESTAMP[0],
-            sqlite: DataType.mapType.TIMESTAMP[1],
-            oracle: DataType.mapType.TIMESTAMP[2],
-            mongodb: DataType.mapType.TIMESTAMP[3]
+            js: DataType.mapType().TIMESTAMP[0],
+            sqlite: DataType.mapType().TIMESTAMP[1],
+            oracle: DataType.mapType().TIMESTAMP[2],
+            mongodb: DataType.mapType().TIMESTAMP[3]
         })
     }
 
@@ -24,8 +24,8 @@ class TIMESTAMP extends DataType {
     */
     getTrueData(value, dbType) {
         let customeDate = new Date(value);
-        if (dbType === DataType.mapType.dbTypes[0]) return customeDate
-        if (dbType === DataType.mapType.dbTypes[1]) return customeDate.getTime();
+        if (dbType === DataType.mapType().dbTypes[0]) return customeDate
+        if (dbType === DataType.mapType().dbTypes[1]) return customeDate.getTime();
         return customeDate.getTime();
     }
 }
