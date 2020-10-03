@@ -347,9 +347,13 @@ class NodeDatabase {
    */
   convertModelTableToJson(tableName, jsonStructure) {
     let cols = [];
+    let orm_foreign_key;
     for (let key in jsonStructure) {
       let el = jsonStructure[key];
       if (el && el.type) {
+        // gán mệnh đề foreign_key nếu tồn tại ít nhất một mệnh đề cuối cùng lấy được
+        orm_foreign_key = el.foreignKey || el.orm_foreign_key || orm_foreign_key;
+        // 
         let opts = `${
           // nếu csdl nào không hổ trợ thì tắt nó đi và sử dụng mô hình model để tạo id tự động
           !el.autoIncrement || !this.cfg.auto_increment_support
@@ -362,6 +366,13 @@ class NodeDatabase {
         cols.push({ name: key, type: el.type, option_key: opts });
       } else cols.push({ name: key, type: el });
     }
+    // bổ sung mệnh đề phụ tạo foreign_key cho sqlite, vì sqlite chỉ cho phép tạo cùng mệnh đề, 
+    // oracle có thể tạo ràng buộc độc lập riêng sau đó như index
+    // console.log(`Mệnh đề tạo bảng theo kiểu dữ liệu cols[cols.length-1].option_key`, cols[cols.length - 1].option_key, orm_foreign_key);
+    if (orm_foreign_key && (this.db instanceof SQLiteDAO)) {
+      cols[cols.length - 1].option_key = (cols[cols.length - 1].option_key ? cols[cols.length - 1].option_key : "") + `, ${orm_foreign_key}`
+    }
+    // console.log(`Cols`, cols);
     return { name: tableName, cols };
   }
 

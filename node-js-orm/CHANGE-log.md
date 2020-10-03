@@ -1,3 +1,5 @@
+ver 1.1.22 create table with foreign_key in sqlite3
+
 ver 1.1.21 fix bug import empty table && bug insert data
 
 ver 1.1.16 make help use models
