@@ -1,3 +1,5 @@
+ver 1.1.17 fix bug import empty table
+
 ver 1.1.16 make help use models
 
 ver 1.1.15 fix create sqlite index

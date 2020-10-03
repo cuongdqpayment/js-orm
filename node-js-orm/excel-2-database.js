@@ -153,8 +153,13 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
             },
             2));
         // lấy mô hình của chính bảng dữ liệu đó
-        let model = models.find(x => x.getName() === tableName)
-        if (model) importModels.push(importArray2Database(model, arrJson, GROUP_COUNT, isDebug))
+        let model = models.find(x => x.getName() === tableName);
+        // fix bug for import empty table data
+        if (model
+            && arrJson && arrJson.length > 0
+            && arrJson[0].constructor === Object
+            && Object.keys(arrJson[0]).length > 0)
+            importModels.push(importArray2Database(model, arrJson, GROUP_COUNT, isDebug))
     }
     // thực hiện chèn dữ liệu làm đồng thời song song các bảng
     return Promise.all(importModels)
