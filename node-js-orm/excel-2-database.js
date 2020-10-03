@@ -159,7 +159,7 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
             importModels.push(importArray2Database(model
                 , arrJson
                     .filter(x => x
-                        && typeof x != "object"
+                        && typeof x === "object"
                         && Object.keys(x).length !== 0
                     )
                 , GROUP_COUNT, isDebug))
