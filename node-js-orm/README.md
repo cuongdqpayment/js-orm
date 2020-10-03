@@ -3,7 +3,7 @@
 
 # 1. install
 ```sh
-npm i node-js-orm@latest cng-node-js-utils
+npm i node-js-orm@latest cng-node-js-utils@latest
 ```
 
 # 2. test demo define model to sqlite db
