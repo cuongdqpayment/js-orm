@@ -96,8 +96,8 @@ const createExcel2Tables = (models) => {
  * @param {*} arrJson 
  */
 const importArray2Database = (model, arrJson, GROUP_COUNT = 100, isDebug) => {
-    if (!model || !arrJson || !arrJson.length) {
-        return new Promise((rs, rj) => rj(`Không khai báo đầy đủ các biến vào: model, arrJson hoặc không có dữ liệu để chèn`));
+    if (!model || !arrJson) {
+        return Promise.reject(`Không khai báo đầy đủ các biến vào: model, arrJson hoặc không có dữ liệu để chèn`);
     }
     return new Promise(async (rs, rj) => {
         let result = { table_name: model.getName(), count_insert: 0, count_fail: 0, group_batch: GROUP_COUNT }
@@ -146,6 +146,7 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
                 console.log('Lỗi đọc sheet ', err);
             });
         // Loại bỏ các cell='' thành null hoặc undefined 
+        // fix bug for import empty table data
         let arrJson = JSON.parse(JSON.stringify(results,
             (key, value) => {
                 if (value === null || value === '') { return undefined; }
@@ -154,12 +155,14 @@ const importExcel2Database = async (models, excelFilename, dataSheets, GROUP_COU
             2));
         // lấy mô hình của chính bảng dữ liệu đó
         let model = models.find(x => x.getName() === tableName);
-        // fix bug for import empty table data
-        if (model
-            && arrJson && arrJson.length > 0
-            && arrJson[0].constructor === Object
-            && Object.keys(arrJson[0]).length > 0)
-            importModels.push(importArray2Database(model, arrJson, GROUP_COUNT, isDebug))
+        if (model && arrJson && Array.isArray(arrJson))
+            importModels.push(importArray2Database(model
+                , arrJson
+                    .filter(x => x
+                        && typeof x != "object"
+                        && Object.keys(x).length !== 0
+                    )
+                , GROUP_COUNT, isDebug))
     }
     // thực hiện chèn dữ liệu làm đồng thời song song các bảng
     return Promise.all(importModels)
