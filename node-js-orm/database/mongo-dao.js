@@ -392,14 +392,15 @@ class MongoDAO {
    * @param {*} jsonFields chỉ lọc những trường dữ liệu trả về thôi { a: 1 } | { _id: 0, a: 1 }
    * @param {*} jsonWhere Mệnh đề where {a:"test"} | { a: { $gt:"1"} } | { a: { $regex: /^t/ } } | { a: {$in: [ "cũ", "1" ]} }
    * @param {*} jsonSort  Mệnh đề sắp xếp { a: 1 } => 1 = A-Z, -1 = Z-A
+   * @param {*} jsonPaging  Mệnh đề giới hạn { limit:1, offset:5}
    */
-  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
+  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
     return new Promise(async (rs, rj) => {
       if (this.isOpen) {
         try {
           let cursor = await this.db
             .collection(tableName)
-            .find(jsonWhere || {}, { sort: jsonSort, projection: jsonFields });
+            .find(jsonWhere || {}, { sort: jsonSort, projection: jsonFields, ...jsonPaging });
           // if (jsonSort) cursor = await cursor.sort(jsonSort)
           var rtn = await cursor.toArray();
           rs(rtn);

@@ -718,6 +718,8 @@ class OracleDAO {
 
   /**
    * Lấy toàn bộ bảng ghi theo mệnh đề where
+   * Sắp xếp order,
+   * Và phân trang giới hạn bảng ghi truy vấn
    * @param {*} selectTable
    */
   selectAll(selectTable) {
@@ -769,6 +771,12 @@ class OracleDAO {
         order_by = (order_by ? ", " + col.name : col.name) +
           (col.value ? " " + col.value : "");
       if (order_by) sql += ` ORDER BY ${order_by}`;
+    }
+
+    // bổ sung mệnh đề phân trang, chỉ cho oracle 12 trở lên
+    if (selectTable.limitOffset) {
+      sql += (selectTable.limitOffset.limit ? ` FETCH NEXT ${selectTable.limitOffset.limit} ROWS ONLY` : ``);
+      sql += (selectTable.limitOffset.offset ? ` OFFSET ${selectTable.limitOffset.offset} ROWS` : ``);
     }
 
     return this.getRsts(sql, params);

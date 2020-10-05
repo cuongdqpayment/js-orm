@@ -160,12 +160,13 @@ class Model {
 
   /**
    * Lấy toàn bộ bảng ghi theo mệnh đề where
-   * @param {*} jsonWhere
-   * @param {*} jsonFields
-   * @param {*} jsonSort
+   * @param {*} jsonWhere  // ex: {id: 5, status: "OFF"} = where id = 5 and status = 'OFF' 
+   * @param {*} jsonFields // ex: {id:1,field:1} = select id, field from ...
+   * @param {*} jsonSort   // ex: {id: -1} = order by id desc
+   * @param {*} jsonPaging // ex: {limit:10 , offset:5}
    */
-  readAll(jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
-    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort);
+  readAll(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
+    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, jsonPaging);
   }
 
   /**

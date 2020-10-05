@@ -452,6 +452,12 @@ class SQLiteDAO {
       if (order_by) sql += ` ORDER BY ${order_by}`;
     }
 
+    // bổ sung mệnh đề phân trang
+    if (selectTable.limitOffset) {
+      sql += (selectTable.limitOffset.limit ? ` LIMIT ${selectTable.limitOffset.limit}` : ``);
+      sql += (selectTable.limitOffset.offset ? ` OFFSET ${selectTable.limitOffset.offset}` : ``);
+    }
+    
     //console.log(sql);
     //console.log(params);
     return this.getRsts(sql, params);

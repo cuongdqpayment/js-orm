@@ -77,16 +77,13 @@ class NodeDatabase {
       case "oracle":
         let connectString = `(DESCRIPTION =
                                             (ADDRESS_LIST =
-                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${
-          this.cfg.host || "localhost"
-          })(PORT = ${
-          this.cfg.port || 1521
+                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${this.cfg.host || "localhost"
+          })(PORT = ${this.cfg.port || 1521
           }))
                                             )
                                             (CONNECT_DATA =
                                                 (SERVER = DEDICATED)
-                                                (SERVICE_NAME = ${
-          this.cfg.database
+                                                (SERVICE_NAME = ${this.cfg.database
           })
                                             )
                                     )`;
@@ -94,8 +91,7 @@ class NodeDatabase {
           let hostString = "";
           for (let h of this.cfg.hosts)
             if (h)
-              hostString += `(ADDRESS=(PROTOCOL=TCP)(HOST=${h.host})(PORT=${
-                h.port || 1521
+              hostString += `(ADDRESS=(PROTOCOL=TCP)(HOST=${h.host})(PORT=${h.port || 1521
                 }))`;
           connectString = `(DESCRIPTION=(LOAD_BALANCE=on)
                                         (ADDRESS_LIST= ${hostString})
@@ -103,16 +99,13 @@ class NodeDatabase {
         } else if (this.cfg.hosts && this.cfg.hosts.length === 1) {
           connectString = `(DESCRIPTION =
                                             (ADDRESS_LIST =
-                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${
-            this.cfg.hosts[0].host
-            })(PORT = ${
-            this.cfg.hosts[0].port || 1521
+                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${this.cfg.hosts[0].host
+            })(PORT = ${this.cfg.hosts[0].port || 1521
             }))
                                             )
                                             (CONNECT_DATA =
                                                 (SERVER = DEDICATED)
-                                                (SERVICE_NAME = ${
-            this.cfg.database
+                                                (SERVICE_NAME = ${this.cfg.database
             })
                                             )
                                     )`;
@@ -130,8 +123,7 @@ class NodeDatabase {
         }, connCfg.isDebug);
         break;
       case "mongodb":
-        let hostString = `${this.cfg.host || "localhost"}:${
-          this.cfg.port || 27017
+        let hostString = `${this.cfg.host || "localhost"}:${this.cfg.port || 27017
           }`;
         if (this.cfg.hosts) {
           hostString = "";
@@ -267,12 +259,23 @@ class NodeDatabase {
   }
 
   // truy vấn tất cả bảng ghi
-  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
+  /**
+   * select ...jsonFields from ...tableName 
+   * where ...jsonWhere 
+   * order by ...jsonSort 
+   * limit ... offset ...jsonPaging
+   * @param {*} tableName 
+   * @param {*} jsonWhere 
+   * @param {*} jsonFields 
+   * @param {*} jsonSort 
+   * @param {*} jsonPaging 
+   */
+  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.selectAll(tableName, jsonWhere, jsonFields, jsonSort);
+      return this.db.selectAll(tableName, jsonWhere, jsonFields, jsonSort, { ...jsonPaging, skip: jsonPaging.offset });
     } else if (this.db !== null) {
       return this.db.selectAll(
-        this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort)
+        this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort, jsonPaging)
       );
     } else return this.errorPromise("Lỗi truy vấn dữ liệu");
   }
@@ -292,9 +295,10 @@ class NodeDatabase {
     tablename,
     jsonWhere = {},
     jsonFields = {},
-    jsonSort = {}
+    jsonSort = {},
+    jsonPaging = {}
   ) {
-    let jsonDao = { name: tablename, cols: [], wheres: [], orderbys: [] };
+    let jsonDao = { name: tablename, cols: [], wheres: [], orderbys: [], limitOffset: jsonPaging };
 
     if (jsonFields)
       for (let key in jsonFields)

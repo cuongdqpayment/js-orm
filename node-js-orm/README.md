@@ -510,3 +510,8 @@ class YourModelName extends Model() {
 // Export your model to app
 module.exports = new YourModelName(db, tableName, json2Model.jsonText2Model(your_table_name))
 ```
+
+# 10 select with limit and offset in oracle/mongodb/sqlite3
+```js
+db.selectAll({id:10}, {id:1,field:1}, {order_1: -1}, {limit:10, offset: 0})
+```
