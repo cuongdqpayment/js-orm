@@ -1,4 +1,7 @@
 /**
+ *  * 4.5 ngày 10/10/2020
+ * Bổ sung các mệnh đề $lt,$gt,$in
+ * 
  * Giao tiếp csdl tự động, sử dụng chung các mệnh đề insertOne, updateWhere, selectOne, selectAll, deleteOne
  * Giao tiếp các phương thức để: Tạo bảng - tương đương một model cho phép:
  * - tìm bảng ghi (s) = selectOne / selectAll,
@@ -9,12 +12,14 @@
  *
  */
 
-var SQLiteDAO = require("./sqlite-dao"),
+const SQLiteDAO = require("./sqlite-dao"),
   OracleDAO = require("./oracle-dao"),
   MongoDAO = require("./mongo-dao");
 
+const changeMongoWheres2Sql = require("./mongo-where-2-sql");
+
 // nếu không khai chuỗi kết nối thì nó tự tạo ra chuỗi default là sqlite3
-let defaultCfg = {
+const defaultCfg = {
   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
   isDebug: true,
   database: "../db/database/node-js-orm-demo-sqlite3.db",
@@ -256,6 +261,41 @@ class NodeDatabase {
         this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort)
       );
     } else return this.errorPromise();
+  }
+
+  /**
+   * Truy vấn đếm số lượng bảng ghi để phân trang select
+   * @param {*} tableName 
+   * @param {*} jsonWhere 
+   */
+  selectCount(tableName, jsonWhere = {}) {
+    if (this.db instanceof MongoDAO) {
+      return this.db.selectCount(tableName, jsonWhere);
+    } else if (this.db !== null) {
+      let sqlWheres = "";
+      let i = 0;
+      for (let key in jsonWhere) {
+        let value = jsonWhere[key];
+        if (value != undefined && value != null) {
+          // ver 4.0 bổ sung mệnh đề in trong where
+          if (Array.isArray(value)) {
+            sqlWheres = i++ === 0 ? ` WHERE ${key} IN ('${value.join("','")}')` : ` AND ${key} IN ('${value.join("','")}')`;
+          } else if (typeof value === "object") {
+            // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+            let { iOut, whereS } = changeMongoWheres2Sql(key, value, i);
+            i = iOut;
+            sqlWheres += whereS;
+            // console.log("--->", iOut, whereS);
+          } else {
+            sqlWheres = i++ === 0 ? ` where ${key}='${value}'` : ` and ${key}='${value}'`;
+          }
+        }
+      }
+      return this.db.getRst(`select count(*) as cnt_ from ${tableName}${sqlWheres}`)
+        .then(rst => {
+          return rst.cnt_;
+        })
+    } else return Promise.reject("Không có dữ liệu để truy vấn");
   }
 
   // truy vấn tất cả bảng ghi

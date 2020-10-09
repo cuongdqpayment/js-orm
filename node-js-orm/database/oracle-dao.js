@@ -1,6 +1,8 @@
 "use strict";
 /**
- *
+ * * 4.5 ngày 10/10/2020
+ * Bổ sung các mệnh đề $lt,$gt,$in
+ * 
  * version 2.0
  * Ngày 30/01/2020
  * Chỉnh sửa kết nối qua pool
@@ -17,6 +19,8 @@
  * runSql --> thuc hien khong tra ket qua
  * executeFunction???, refCursor??
  */
+
+const changeMongoWheres2Sql = require("./mongo-where-2-sql");
 
 const configDefault = {
   poolAlias: "TestOracleDBPool", //ten cua pool
@@ -556,17 +560,30 @@ class OracleDAO {
       if (col.value != undefined && col.value != null) {
         if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
           if (i == 0) {
-            sql += " WHERE " + col.name + "=" + col.value.substring(3);
+            sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
           } else {
-            sql += " AND " + col.name + "=" + col.value.substring(3);
+            sql += ` AND ${col.name}=${col.value.substring(3)}`;
           }
           i++;
+        } else if (Array.isArray(col.value)) {
+          // ver 4.0 bổ sung mệnh đề in trong where
+          if (i++ == 0) {
+            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+          } else {
+            sql += ` AND ${col.name} in ('${value.join("','")}')`;
+          }
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sql += whereS;
+          // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
           if (i == 0) {
-            sql += " WHERE " + col.name + "= :" + idx++;
+            sql += ` WHERE ${col.name}= :${idx++}`;
           } else {
-            sql += " AND " + col.name + "= :" + idx++;
+            sql += ` AND ${col.name}= :${idx++}`;
           }
           i++;
         }
@@ -591,17 +608,30 @@ class OracleDAO {
       if (col.value != undefined && col.value != null) {
         if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
           if (i == 0) {
-            sql += " WHERE " + col.name + "=" + col.value.substring(3);
+            sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
           } else {
-            sql += " AND " + col.name + "=" + col.value.substring(3);
+            sql += ` AND ${col.name}=${col.value.substring(3)}`;
           }
           i++;
+        } else if (Array.isArray(col.value)) {
+          // ver 4.0 bổ sung mệnh đề in trong where
+          if (i++ == 0) {
+            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+          } else {
+            sql += ` AND ${col.name} in ('${value.join("','")}')`;
+          }
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sql += whereS;
+          // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
           if (i == 0) {
-            sql += " WHERE " + col.name + "= :" + idx++;
+            sql += ` WHERE ${col.name}= :${idx++}`;
           } else {
-            sql += " AND " + col.name + "= :" + idx++;
+            sql += ` AND ${col.name}= :${idx++}`;
           }
           i++; //tang i len 1
         }
@@ -643,17 +673,30 @@ class OracleDAO {
         if (col.value != undefined && col.value != null) {
           if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
             if (i == 0) {
-              sql += " WHERE " + col.name + "=" + col.value.substring(3);
+              sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
             } else {
-              sql += " AND " + col.name + "=" + col.value.substring(3);
+              sql += ` AND ${col.name}=${col.value.substring(3)}`;
             }
             i++;
+          } else if (Array.isArray(col.value)) {
+            // ver 4.0 bổ sung mệnh đề in trong where
+            if (i++ == 0) {
+              sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+            } else {
+              sql += ` AND ${col.name} in ('${value.join("','")}')`;
+            }
+          } else if (typeof col.value === "object") {
+            // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+            let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+            i = iOut;
+            sql += whereS;
+            // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
             if (i == 0) {
-              sql += " WHERE " + col.name + "= :" + idx++;
+              sql += ` WHERE ${col.name}= :${idx++}`;
             } else {
-              sql += " AND " + col.name + "= :" + idx++;
+              sql += ` AND ${col.name}= :${idx++}`;
             }
             i++;
           }
@@ -746,17 +789,30 @@ class OracleDAO {
         if (col.value != undefined && col.value != null) {
           if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
             if (i == 0) {
-              sql += " WHERE " + col.name + "=" + col.value.substring(3);
+              sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
             } else {
-              sql += " AND " + col.name + "=" + col.value.substring(3);
+              sql += ` AND ${col.name}=${col.value.substring(3)}`;
             }
             i++;
+          } else if (Array.isArray(col.value)) {
+            // ver 4.0 bổ sung mệnh đề in trong where
+            if (i++ == 0) {
+              sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+            } else {
+              sql += ` AND ${col.name} in ('${value.join("','")}')`;
+            }
+          } else if (typeof col.value === "object") {
+            // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+            let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+            i = iOut;
+            sql += whereS;
+            // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
             if (i == 0) {
-              sql += " WHERE " + col.name + "= :" + idx++;
+              sql += ` WHERE ${col.name}= :${idx++}`;
             } else {
-              sql += " AND " + col.name + "= :" + idx++;
+              sql += ` AND ${col.name}= :${idx++}`;
             }
             i++;
           }

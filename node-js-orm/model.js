@@ -1,4 +1,7 @@
 /**
+ *  * 4.5 ngày 10/10/2020
+ * Bổ sung các mệnh đề $lt,$gt,$in
+ * 
  * Đây là đối tượng giao tiếp model CRUD chứa các phương thức tạo ra mô hình bất kỳ
  * Nó tương đương một bảng trong csdl, có thể lấy 1 bảng ghi
  * Chứa thông tin cấu trúc dữ liệu giao tiếp giữa form và giữa csdl
@@ -156,6 +159,35 @@ class Model {
    */
   read(jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
     return this.db.selectOne(this.tableName, jsonWhere, jsonFields, jsonSort);
+  }
+
+  /**
+   * Chỉ đọc số liệu bảng ghi trong một bảng
+   * @param {*} jsonWhere 
+   */
+  readCount(jsonWhere = {}) {
+    return this.db.selectCount(this.tableName, jsonWhere)
+  }
+
+  /**
+   * Truy vấn số lượng bảng ghi của một trang
+   * Dữ liệu đầu vào là 
+   * @param {*} jsonWhere 
+   * @param {*} jsonFields 
+   * @param {*} jsonSort 
+   * @param {*} jsonPage { page , limit, total}
+   */
+  readPage(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPage = {}) {
+    let { limit, total, page } = jsonPage;
+    limit = limit || 50; // mặt định là số bảng ghi là 50/trang
+    let offset = limit * (page - 1);
+    if ((total && offset > total) || page <= 0) {
+      return Promise.resolve({ page, data: [] });
+    }
+    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, { limit, offset })
+      .then(data => {
+        return { page, data };
+      })
   }
 
   /**

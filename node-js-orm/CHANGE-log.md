@@ -1,3 +1,5 @@
+ver 2.0.5 page, count, $lt, $gt, $in
+
 ver 2.0.0 add limit and offset for oracle 12 and mongodb, sqlite3
 
 ver 1.1.22 create table with foreign_key in sqlite3

@@ -1,5 +1,8 @@
 "use strict";
 /**
+ * 4.5 ngày 10/10/2020
+ * Bổ sung các mệnh đề $lt,$gt,$in
+ * 
  * ver 4.0 ngày 01/11/2019
  * Tích hợp hàm chuyển đổi jsonData=>jsonSql
  * Và sử dụng mệnh đề where khi value là array --> in ()
@@ -24,6 +27,8 @@
  */
 const fs = require("fs");
 const path = require("path");
+
+const changeMongoWheres2Sql = require("./mongo-where-2-sql");
 
 class SQLiteDAO {
   constructor(dbFilePath, isDebug) {
@@ -278,10 +283,16 @@ class SQLiteDAO {
         // ver 4.0 bổ sung mệnh đề in trong where
         if (Array.isArray(col.value)) {
           if (i++ == 0) {
-            sql += " WHERE " + col.name + " in (" + col.value.toString() + ")";
+            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
           } else {
-            sql += " AND " + col.name + " in (" + col.value.toString() + ")";
+            sql += ` AND ${col.name} in ('${value.join("','")}')`;
           }
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sql += whereS;
+          // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
           if (i++ == 0) {
@@ -318,10 +329,16 @@ class SQLiteDAO {
         // ver 4.0 bổ sung mệnh đề in trong where
         if (Array.isArray(col.value)) {
           if (i++ == 0) {
-            sql += " WHERE " + col.name + " in (" + col.value.toString() + ")";
+            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
           } else {
-            sql += " AND " + col.name + " in (" + col.value.toString() + ")";
+            sql += ` AND ${col.name} in ('${value.join("','")}')`;
           }
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sql += whereS;
+          // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
           if (i++ == 0) {
@@ -368,10 +385,16 @@ class SQLiteDAO {
           if (Array.isArray(col.value)) {
             if (i++ == 0) {
               sql +=
-                " WHERE " + col.name + " in (" + col.value.toString() + ")";
+                ` WHERE ${col.name} in ('${value.join("','")}')`;
             } else {
-              sql += " AND " + col.name + " in (" + col.value.toString() + ")";
+              sql += ` AND ${col.name} in ('${value.join("','")}')`;
             }
+          } else if (typeof col.value === "object") {
+            // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+            let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+            i = iOut;
+            sql += whereS;
+            // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
             if (i++ == 0) {
@@ -396,6 +419,7 @@ class SQLiteDAO {
     // console.log("Tham số", params);
     return this.getRst(sql, params);
   }
+
 
   /**
    * Lấy toàn bộ bảng ghi theo mệnh đề where
@@ -427,10 +451,16 @@ class SQLiteDAO {
           if (Array.isArray(col.value)) {
             if (i++ == 0) {
               sql +=
-                " WHERE " + col.name + " in (" + col.value.toString() + ")";
+                ` WHERE ${col.name} in ('${value.join("','")}')`;
             } else {
-              sql += " AND " + col.name + " in (" + col.value.toString() + ")";
+              sql += ` AND ${col.name} in ('${value.join("','")}')`;
             }
+          } else if (typeof col.value === "object") {
+            // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+            let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+            i = iOut;
+            sql += whereS;
+            // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
             if (i++ == 0) {
@@ -457,7 +487,7 @@ class SQLiteDAO {
       sql += (selectTable.limitOffset.limit ? ` LIMIT ${selectTable.limitOffset.limit}` : ``);
       sql += (selectTable.limitOffset.offset ? ` OFFSET ${selectTable.limitOffset.offset}` : ``);
     }
-    
+
     //console.log(sql);
     //console.log(params);
     return this.getRsts(sql, params);
@@ -523,6 +553,7 @@ class SQLiteDAO {
       });
     });
   }
+
 }
 
 module.exports = SQLiteDAO;

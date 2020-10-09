@@ -1,5 +1,7 @@
 "use strict";
 /**
+ * Bổ sung count
+ * 
  * Giao tiếp dữ liệu mongo
  * Cho phép tạo database
  * Tạo Tabe = collection
@@ -384,6 +386,28 @@ class MongoDAO {
       } else rj("Database not Open for select!");
     });
   }
+
+  /**
+   * Đếm số lượng bảng ghi (documents) trong bảng (collection)
+   * @param {*} tableName 
+   * @param {*} jsonWhere 
+   */
+  selectCount(tableName, jsonWhere = {}) {
+    return new Promise(async (rs, rj) => {
+      if (this.isOpen) {
+        try {
+          let cursor = await this.db
+            .collection(tableName)
+            .find(jsonWhere);
+          var rtn = await cursor.count();
+          rs(rtn);
+        } catch (e) {
+          rj(e);
+        }
+      } else rj("Database not Open for selects!");
+    });
+  }
+
 
   /**
    * jsonWhere tra cứu cấu trúc lệnh collection.find() trong mongo
