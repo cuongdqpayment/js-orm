@@ -1,3 +1,5 @@
+ver 2.0.6 fix limit, page and total is integer for mongodb;
+
 ver 2.0.6 add: $in, $nin, $lt, $gt, $lte, $gte, $ne, $like, $exists, $null
 fix mongo for INTEGER for int and NUMBER for float
 

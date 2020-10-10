@@ -179,7 +179,16 @@ class Model {
    */
   readPage(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPage = {}) {
     let { limit, total, page } = jsonPage;
-    limit = limit || 50; // mặt định là số bảng ghi là 50/trang
+    const DEFAULT_LIMIT = 5; // mặt định là số bảng ghi là 5/trang
+    try {
+      limit = limit ? parseInt(limit) : DEFAULT_LIMIT;
+      total = total ? parseInt(total) : undefined;
+      page = page ? parseInt(page) : 1;
+    } catch (e) {
+      limit = DEFAULT_LIMIT;
+      total = undefined;
+      page = 1;
+    }
     let offset = limit * (page - 1);
     if ((total && offset > total) || page <= 0) {
       return Promise.resolve({ page, data: [] });
