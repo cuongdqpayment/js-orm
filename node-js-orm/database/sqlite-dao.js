@@ -1,7 +1,7 @@
 "use strict";
 /**
- * 4.5 ngày 10/10/2020
- * Bổ sung các mệnh đề $lt,$gt,$in
+ * 4.5.1 ngày 10/10/2020
+ * Bổ sung các mệnh đề $in, $nin, $lt, $gt, $lte, $gte, $ne, $like, $exists, $null
  * 
  * ver 4.0 ngày 01/11/2019
  * Tích hợp hàm chuyển đổi jsonData=>jsonSql
@@ -282,11 +282,7 @@ class SQLiteDAO {
       if (col.value !== undefined && col.value !== null) {
         // ver 4.0 bổ sung mệnh đề in trong where
         if (Array.isArray(col.value)) {
-          if (i++ == 0) {
-            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
-          } else {
-            sql += ` AND ${col.name} in ('${value.join("','")}')`;
-          }
+          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
         } else if (typeof col.value === "object") {
           // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
           let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
@@ -295,19 +291,10 @@ class SQLiteDAO {
           // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
-          if (i++ == 0) {
-            sql += " WHERE " + col.name + "= ?";
-          } else {
-            sql += " AND " + col.name + "= ?";
-          }
+          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
         }
       } else if (col.value === null) {
-        // mệnh đề null luôn không tăng i
-        if (i++ == 0) {
-          sql += " WHERE " + col.name + "is null";
-        } else {
-          sql += " AND " + col.name + "is null";
-        }
+        sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
       } else {
         sql += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
       }
@@ -328,11 +315,7 @@ class SQLiteDAO {
       if (col.value != undefined && col.value != null) {
         // ver 4.0 bổ sung mệnh đề in trong where
         if (Array.isArray(col.value)) {
-          if (i++ == 0) {
-            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
-          } else {
-            sql += ` AND ${col.name} in ('${value.join("','")}')`;
-          }
+          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
         } else if (typeof col.value === "object") {
           // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
           let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
@@ -341,12 +324,10 @@ class SQLiteDAO {
           // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
-          if (i++ == 0) {
-            sql += " WHERE " + col.name + "= ?";
-          } else {
-            sql += " AND " + col.name + "= ?";
-          }
+          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
         }
+      } else if (col.value === null) {
+        sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
       } else {
         sql += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
       }
@@ -383,12 +364,7 @@ class SQLiteDAO {
         if (col.value != undefined && col.value != null) {
           // ver 4.0 bổ sung mệnh đề in trong where
           if (Array.isArray(col.value)) {
-            if (i++ == 0) {
-              sql +=
-                ` WHERE ${col.name} in ('${value.join("','")}')`;
-            } else {
-              sql += ` AND ${col.name} in ('${value.join("','")}')`;
-            }
+            sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
           } else if (typeof col.value === "object") {
             // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
             let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
@@ -397,12 +373,10 @@ class SQLiteDAO {
             // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
-            if (i++ == 0) {
-              sql += " WHERE " + col.name + "= ?";
-            } else {
-              sql += " AND " + col.name + "= ?";
-            }
+            sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
           }
+        } else if (col.value === null) {
+          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
         }
       }
     }
@@ -449,12 +423,7 @@ class SQLiteDAO {
         if (col.value != undefined && col.value != null) {
           // ver 4.0 bổ sung mệnh đề in trong where
           if (Array.isArray(col.value)) {
-            if (i++ == 0) {
-              sql +=
-                ` WHERE ${col.name} in ('${value.join("','")}')`;
-            } else {
-              sql += ` AND ${col.name} in ('${value.join("','")}')`;
-            }
+            sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
           } else if (typeof col.value === "object") {
             // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
             let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
@@ -463,12 +432,10 @@ class SQLiteDAO {
             // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
-            if (i++ == 0) {
-              sql += " WHERE " + col.name + "= ?";
-            } else {
-              sql += " AND " + col.name + "= ?";
-            }
+            sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
           }
+        } else if (col.value === null) {
+          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
         }
       }
     }

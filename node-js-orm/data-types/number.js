@@ -11,5 +11,13 @@ class NUMBER extends DataType {
             mongodb: DataType.mapType().NUMBER[3]
         })
     }
+    /**
+     * Chuyển đổi dữ liệu sang float nếu nó là string
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueData(value, dbType) {
+        return parseFloat(value)
+    }
 }
 module.exports = new NUMBER()

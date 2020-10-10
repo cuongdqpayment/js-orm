@@ -1,6 +1,7 @@
 /**
- *  * 4.5 ngày 10/10/2020
- * Bổ sung các mệnh đề $lt,$gt,$in
+ *  4.5 ngày 10/10/2020
+ * Bổ sung các mệnh đề $like, $null cho mongodb fix lỗi
+ * Chuyển đổi dữ liệu string sang integer và float trước khi đưa vào mongo
  * 
  * Giao tiếp csdl tự động, sử dụng chung các mệnh đề insertOne, updateWhere, selectOne, selectAll, deleteOne
  * Giao tiếp các phương thức để: Tạo bảng - tương đương một model cho phép:
@@ -16,7 +17,9 @@ const SQLiteDAO = require("./sqlite-dao"),
   OracleDAO = require("./oracle-dao"),
   MongoDAO = require("./mongo-dao");
 
-const changeMongoWheres2Sql = require("./mongo-where-2-sql");
+const mongoWhere2Sql = require("./mongo-where-2-sql");
+
+const modelWhere2Mongo = require("./model-where-2-mongo");
 
 // nếu không khai chuỗi kết nối thì nó tự tạo ra chuỗi default là sqlite3
 const defaultCfg = {
@@ -235,7 +238,7 @@ class NodeDatabase {
     if (this.db instanceof MongoDAO) {
       // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
       // tuy nhiên phù hợp với csdl sql khác thì nó có update tất cả bảng ghi thỏa điều kiện
-      return this.db.updates(tableName, jsonWhere, jsonData);
+      return this.db.updates(tableName, modelWhere2Mongo(jsonWhere), jsonData);
     } else if (this.db !== null) {
       return this.db.update(
         this.convertDaoFromMongo(tableName, jsonWhere, jsonData)
@@ -246,7 +249,7 @@ class NodeDatabase {
   // xóa theo mệnh đề where
   deleteWhere(tableName, jsonWhere = {}, jsonOption = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.delete(tableName, jsonWhere, jsonOption);
+      return this.db.delete(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
     } else if (this.db !== null) {
       return this.db.delete(this.convertDaoFromMongo(tableName, jsonWhere));
     } else return this.errorPromise();
@@ -255,7 +258,7 @@ class NodeDatabase {
   // truy vấn lấy 1 bảng ghi
   selectOne(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.select(tableName, jsonWhere, jsonFields, jsonSort);
+      return this.db.select(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort);
     } else if (this.db !== null) {
       return this.db.select(
         this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort)
@@ -270,7 +273,7 @@ class NodeDatabase {
    */
   selectCount(tableName, jsonWhere = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.selectCount(tableName, jsonWhere);
+      return this.db.selectCount(tableName, modelWhere2Mongo(jsonWhere));
     } else if (this.db !== null) {
       let sqlWheres = "";
       let i = 0;
@@ -282,7 +285,7 @@ class NodeDatabase {
             sqlWheres = i++ === 0 ? ` WHERE ${key} IN ('${value.join("','")}')` : ` AND ${key} IN ('${value.join("','")}')`;
           } else if (typeof value === "object") {
             // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
-            let { iOut, whereS } = changeMongoWheres2Sql(key, value, i);
+            let { iOut, whereS } = mongoWhere2Sql(key, value, i);
             i = iOut;
             sqlWheres += whereS;
             // console.log("--->", iOut, whereS);
@@ -312,7 +315,7 @@ class NodeDatabase {
    */
   selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.selectAll(tableName, jsonWhere, jsonFields, jsonSort, { ...jsonPaging, skip: jsonPaging.offset });
+      return this.db.selectAll(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort, { ...jsonPaging, skip: jsonPaging.offset });
     } else if (this.db !== null) {
       return this.db.selectAll(
         this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort, jsonPaging)

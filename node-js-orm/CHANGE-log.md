@@ -1,3 +1,6 @@
+ver 2.0.6 add: $in, $nin, $lt, $gt, $lte, $gte, $ne, $like, $exists, $null
+fix mongo for INTEGER for int and NUMBER for float
+
 ver 2.0.5 page, count, $lt, $gt, $in
 
 ver 2.0.0 add limit and offset for oracle 12 and mongodb, sqlite3

@@ -11,5 +11,13 @@ class INTEGER extends DataType {
             mongodb: DataType.mapType().INTEGER[3]
         })
     }
+    /**
+     * Chuyển đổi dữ liệu thật trong mongo từ text sang số
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueData(value, dbType) {
+        return parseInt(value)
+    }
 }
 module.exports = new INTEGER()
