@@ -16,6 +16,7 @@
 
 class MongoDAO {
   constructor(uri, dbName, isDebug) {
+    if (isDebug) console.log(`INIT MongoDAO with ${uri}/${dbName}`);
     this.isDebug = isDebug;
     this.client = new (require("mongodb").MongoClient)(uri, {
       useNewUrlParser: true,

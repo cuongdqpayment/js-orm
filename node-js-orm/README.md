@@ -522,10 +522,12 @@ db.selectAll({id:{$like:"1*"}}, {id:1,field:1}, {order_1: -1}, {limit:10, offset
 db.selectAll({id:{$in:["1","2"]}}, {id:1,field:1}, {order_1: -1}, {limit:10, offset: 0})
 // ...
 
+// let jsonWheres = { table_name: "tables" }
 // let jsonWheres = { order_1: { $in: [ "3", "4A", "5"] } }
 // let jsonWheres = { order_1: { $lt: "5" } }
+// let jsonWheres = { order_1: { $lte: "5" } }
+// let jsonWheres = { order_1: { $gt: "5" } }
 // let jsonWheres = { order_1: { $gte: "5" , $lte: "7"} }
-// let jsonWheres = { table_name: "tables" }
 // let jsonWheres = { order_1: { $like: "*5*" } }
 // let jsonWheres = { order_1: { $null: false } }
 // let jsonWheres = { order_1: { $exists: false } }

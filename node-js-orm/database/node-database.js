@@ -77,6 +77,7 @@ class NodeDatabase {
   auto_increment_support: false,
    */
   constructor(connCfg) {
+    console.log("START connect to Database ...");
     this.cfg = connCfg || defaultCfg;
     switch (this.cfg.type) {
       case "sqlite3":
