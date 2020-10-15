@@ -1,3 +1,5 @@
+ver 2.0.9 help for node-database to use in db not model
+
 ver 2.0.8 fix log mongo waiting for connect db
 
 ver 2.0.7 fix limit, page and total is integer for mongodb;

@@ -225,7 +225,12 @@ class NodeDatabase {
 
   // các phương thức insertOne, updateWhere, deleteWhere, selectOne,
 
-  // chèn một bảng ghi
+  /**
+   * chèn một bảng ghi
+   * 
+   * @param {*} tableName 
+   * @param {*} jsonData = chứa cấu trúc theo bảng, key = tên trường, value = giá trị của trường đó
+   */
   insertOne(tableName, jsonData = {}) {
     if (this.db instanceof MongoDAO) {
       return this.db.insert(tableName, jsonData);
@@ -234,7 +239,13 @@ class NodeDatabase {
     } else return this.errorPromise();
   }
 
-  // update theo mệnh đề where
+  /**
+   * update theo mệnh đề where
+   * 
+   * @param {*} tableName 
+   * @param {*} jsonData = chứa cấu trúc theo bảng, key = tên trường, value = giá trị của trường đó
+   * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
+   */
   updateWhere(tableName, jsonData = {}, jsonWhere = {}) {
     if (this.db instanceof MongoDAO) {
       // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
@@ -247,16 +258,31 @@ class NodeDatabase {
     } else return this.errorPromise();
   }
 
-  // xóa theo mệnh đề where
+  /**
+   * xóa theo mệnh đề where
+   * 
+   * @param {*} tableName 
+   * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
+   * @param {*} jsonOption = chỉ dùng cho mongo db (tra tham số options của mongo để dùng)
+   */
   deleteWhere(tableName, jsonWhere = {}, jsonOption = {}) {
     if (this.db instanceof MongoDAO) {
-      return this.db.delete(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
+      // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
+      return this.db.deletes(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
     } else if (this.db !== null) {
+      // với dữ liệu sql thì sử dụng mệnh đề where đúng không xóa 1 bảng ghi
       return this.db.delete(this.convertDaoFromMongo(tableName, jsonWhere));
     } else return this.errorPromise();
   }
 
-  // truy vấn lấy 1 bảng ghi
+  /**
+   * truy vấn lấy 1 bảng ghi
+   * 
+   * @param {*} tableName 
+   * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
+   * @param {*} jsonFields = {field_name_i:1 | 0,...} = liệt kê các trường cần lấy
+   * @param {*} jsonSort   = {field_name: 1 | -1} = sắp xếp theo từ thấp đến cao =1 hoặc từ cao xuống thấp =-1
+   */
   selectOne(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
     if (this.db instanceof MongoDAO) {
       return this.db.select(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort);
@@ -270,7 +296,7 @@ class NodeDatabase {
   /**
    * Truy vấn đếm số lượng bảng ghi để phân trang select
    * @param {*} tableName 
-   * @param {*} jsonWhere 
+   * @param {*} jsonWhere {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    */
   selectCount(tableName, jsonWhere = {}) {
     if (this.db instanceof MongoDAO) {
@@ -309,10 +335,10 @@ class NodeDatabase {
    * order by ...jsonSort 
    * limit ... offset ...jsonPaging
    * @param {*} tableName 
-   * @param {*} jsonWhere 
-   * @param {*} jsonFields 
-   * @param {*} jsonSort 
-   * @param {*} jsonPaging 
+   * @param {*} jsonWhere {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
+   * @param {*} jsonFields {field_name_i:1 | 0,...} = liệt kê các trường cần lấy
+   * @param {*} jsonSort {field_name: 1 | -1} = sắp xếp theo từ thấp đến cao =1 hoặc từ cao xuống thấp =-1
+   * @param {*} jsonPaging {limit: x, offset: y} trong đó x là số lượng bảng ghi trả về, y là bắt đầu lấy từ bản ghi thứ y
    */
   selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
     if (this.db instanceof MongoDAO) {
