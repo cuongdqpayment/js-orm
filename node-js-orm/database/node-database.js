@@ -380,11 +380,12 @@ class NodeDatabase {
       for (let key in jsonWhere)
         jsonDao.wheres.push({ name: key, value: jsonWhere[key] });
 
+    // fix bug sort 2 biến trở lên
     if (jsonSort)
       for (let key in jsonSort)
         jsonDao.orderbys.push({
           name: key,
-          value: jsonSort[key] === -1 ? "desc" : "",
+          value: jsonSort[key] === -1 ? `${key} desc` : `${key}`,
         });
 
     return jsonDao;

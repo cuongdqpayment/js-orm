@@ -382,13 +382,15 @@ class SQLiteDAO {
     }
 
     // bổ sung thêm mệnh đề sắp xếp order by
+    // chỉnh sửa bug order
     if (selectTable.orderbys) {
       let order_by = "";
       for (let col of selectTable.orderbys)
-        order_by = (order_by ? ", " + col.name : col.name) +
-          (col.value ? " " + col.value : "");
+        if (col) order_by += order_by ? `, ${col.value}` : `${col.value}`;
       if (order_by) sql += ` ORDER BY ${order_by}`;
+      // console.log("***>", selectTable.orderbys, order_by);
     }
+
     // console.log("Câu sql:", sql);
     // console.log("Tham số", params);
     return this.getRst(sql, params);
@@ -441,12 +443,13 @@ class SQLiteDAO {
     }
 
     // bổ sung thêm mệnh đề sắp xếp order by
+    // chỉnh sửa bug order
     if (selectTable.orderbys) {
       let order_by = "";
       for (let col of selectTable.orderbys)
-        order_by = (order_by ? ", " + col.name : col.name) +
-          (col.value ? " " + col.value : "");
+        if (col) order_by += order_by ? `, ${col.value}` : `${col.value}`;
       if (order_by) sql += ` ORDER BY ${order_by}`;
+      // console.log("***>", selectTable.orderbys, order_by);
     }
 
     // bổ sung mệnh đề phân trang
