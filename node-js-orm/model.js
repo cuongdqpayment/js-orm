@@ -191,11 +191,11 @@ class Model {
     }
     let offset = limit * (page - 1);
     if ((total && offset > total) || page <= 0) {
-      return Promise.resolve({ page, data: [], limit, next_page: 1 });
+      return Promise.resolve({ page, data: [], limit, next_page: 1, length: 0 });
     }
     return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, { limit, offset })
       .then(data => {
-        return { page, data, limit, next_page: data.length < limit ? 1 : page + 1 };
+        return { page, data, limit, next_page: data.length < limit ? 1 : page + 1, length: data.length };
       })
   }
 
