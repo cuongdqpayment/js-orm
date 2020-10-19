@@ -22,30 +22,30 @@ const mongoWhere2Sql = require("./mongo-where-2-sql");
 const modelWhere2Mongo = require("./model-where-2-mongo");
 
 // nếu không khai chuỗi kết nối thì nó tự tạo ra chuỗi default là sqlite3
-const defaultCfg = {
-  type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
-  isDebug: true,
-  database: "../db/database/node-js-orm-demo-sqlite3.db",
-  // phần giành cho các csdl có xác thực
-  hosts: [{ host: "localhost", port: 8080 }],
-  username: "test",
-  password: "test123",
-  // phần giành cho oracle database thêm
-  pool: {
-    name: "Node-Orm-Pool",
-    max: 2,
-    min: 2,
-    increment: 0,
-    idle: 10000,
-    timeout: 4,
-  },
-  // phần giành cho mongodb thêm
-  repSet: "rs0", // Khai báo bộ db replicate
-  isRoot: true, // nếu user của mongo có quyền root t
-  // tham số phụ thêm vào để xác định csdl có hỗ trợ tự tạo auto_increment không?
-  // nếu csdl nào không hổ trợ thì tắt nó đi và sử dụng mô hình model để tạo id tự động
-  auto_increment_support: true,
-};
+// const defaultCfg = {
+//   type: "sqlite3", //  "mongodb" | "oracle" | "sqlite3"
+//   isDebug: true,
+//   database: "../db/database/node-js-orm-demo-sqlite3.db",
+//   // phần giành cho các csdl có xác thực
+//   hosts: [{ host: "localhost", port: 8080 }],
+//   username: "test",
+//   password: "test123",
+//   // phần giành cho oracle database thêm
+//   pool: {
+//     name: "Node-Orm-Pool",
+//     max: 2,
+//     min: 2,
+//     increment: 0,
+//     idle: 10000,
+//     timeout: 4,
+//   },
+//   // phần giành cho mongodb thêm
+//   repSet: "rs0", // Khai báo bộ db replicate
+//   isRoot: true, // nếu user của mongo có quyền root t
+//   // tham số phụ thêm vào để xác định csdl có hỗ trợ tự tạo auto_increment không?
+//   // nếu csdl nào không hổ trợ thì tắt nó đi và sử dụng mô hình model để tạo id tự động
+//   auto_increment_support: true,
+// };
 
 class NodeDatabase {
   /**
@@ -78,7 +78,7 @@ class NodeDatabase {
    */
   constructor(connCfg) {
     console.log("START connect to Database ...");
-    this.cfg = connCfg || defaultCfg;
+    this.cfg = connCfg;
     switch (this.cfg.type) {
       case "sqlite3":
         this.db = new SQLiteDAO(this.cfg.database, connCfg.isDebug);

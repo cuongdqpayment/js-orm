@@ -1,3 +1,5 @@
+ver 2.1.2 fix oracle connection for multi db
+
 ver 2.1.1 return page for next page and length
 
 ver 2.0.9 help for node-database to use in db not model

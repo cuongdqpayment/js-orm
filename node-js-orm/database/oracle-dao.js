@@ -22,37 +22,37 @@
 
 const changeMongoWheres2Sql = require("./mongo-where-2-sql");
 
-const configDefault = {
-  poolAlias: "TestOracleDBPool", //ten cua pool
-  user: "test", //username to oracle
-  password: "test", //password to oracle
-  //connection String to oracle = tnsname
-  connectString: `(DESCRIPTION=
-                    (LOAD_BALANCE=on)
-                    (ADDRESS_LIST=
-                          (ADDRESS=(PROTOCOL=TCP)(HOST=10.151.x.y1)(PORT=1521))
-                          (ADDRESS=(PROTOCOL=TCP)(HOST=10.151.x.y2)(PORT=1521))
-                    )
-                    (CONNECT_DATA=(SERVICE_NAME=TEST))
-                  )`,
-  /*  nếu khai báo server đơn
-  `(DESCRIPTION =
-    (ADDRESS_LIST =
-        (ADDRESS = (PROTOCOL = TCP)(HOST = 127.0.0.1)(PORT = 3005))
-    )\
-    (CONNECT_DATA =
-        (SERVER = DEDICATED)
-        (SERVICE_NAME = XE)
-    )
-  )`, 
-  */
-  poolMax: 2, //so luong pool max
-  poolMin: 2, //so luong pool min
-  poolIncrement: 0, //so luong pool tang len neu co
-  poolTimeout: 4, //thoi gian pool timeout
-};
+// const configDefault = {
+//   poolAlias: "TestOracleDBPool", //ten cua pool
+//   user: "test", //username to oracle
+//   password: "test", //password to oracle
+//   //connection String to oracle = tnsname
+//   connectString: `(DESCRIPTION=
+//                     (LOAD_BALANCE=on)
+//                     (ADDRESS_LIST=
+//                           (ADDRESS=(PROTOCOL=TCP)(HOST=10.151.x.y1)(PORT=1521))
+//                           (ADDRESS=(PROTOCOL=TCP)(HOST=10.151.x.y2)(PORT=1521))
+//                     )
+//                     (CONNECT_DATA=(SERVICE_NAME=TEST))
+//                   )`,
+//   /*  nếu khai báo server đơn
+//   `(DESCRIPTION =
+//     (ADDRESS_LIST =
+//         (ADDRESS = (PROTOCOL = TCP)(HOST = 127.0.0.1)(PORT = 3005))
+//     )\
+//     (CONNECT_DATA =
+//         (SERVER = DEDICATED)
+//         (SERVICE_NAME = XE)
+//     )
+//   )`, 
+//   */
+//   poolMax: 2, //so luong pool max
+//   poolMin: 2, //so luong pool min
+//   poolIncrement: 0, //so luong pool tang len neu co
+//   poolTimeout: 4, //thoi gian pool timeout
+// };
 
-var configOracle;
+// var configOracle;
 
 /**
  * Lớp giao tiếp kết nối với csdl oracle
@@ -75,17 +75,17 @@ class OracleDAO {
     this.oracledb = require("oracledb");
     this.oracledb.autoCommit = true;
 
-    configOracle = dbconfig ? dbconfig : configDefault;
+    this.configOracle = dbconfig;
 
-    this.connectionPool(configOracle)
+    this.connectionPool(this.configOracle)
       .then(async (pool) => {
-        console.log("Connected to database:" + configOracle.connectString);
+        console.log("Connected to database:" + this.configOracle.connectString);
         this.pool = pool;
         let conn;
         try {
           // thử mở kết nối csdl
           conn = await this.doConnection();
-          console.log("Đã kết nối qua Pool " + configOracle.poolAlias);
+          console.log("Đã kết nối qua Pool " + this.configOracle.poolAlias);
           this.isOpen = true;
         } catch (e) {
           console.log("No connection get with error: ", e);
@@ -111,7 +111,7 @@ class OracleDAO {
   doConnection() {
     return new Promise((resolve, reject) => {
       if (this.pool === undefined || this.pool === null) {
-        this.pool = this.oracledb.getPool(configOracle.poolAlias); // lay pool cu
+        this.pool = this.oracledb.getPool(this.configOracle.poolAlias); // lay pool cu
         if (!this.pool) {
           reject("No pool init!");
           return;
