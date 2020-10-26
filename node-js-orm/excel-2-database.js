@@ -92,39 +92,42 @@ const createExcel2Tables = (models) => {
 
 /**
  * Một mô hình đã định nghĩa, một mảng dữ liệu đầu vào cần đưa vào csdl
- * @param {*} model 
- * @param {*} arrJson 
+ * @param {*} model mô hình giao tiếp dữ liệu
+ * @param {*} arrJson mảng dữ liệu để chèn vào csdl
+ * @param {*} GROUP_COUNT số lượng chạy promise đồng thời
+ * @param {*} isDebug debug in lỗi và thành công như nào
  */
 const importArray2Database = (model, arrJson, GROUP_COUNT = 100, isDebug) => {
     if (!model || !arrJson) {
         return Promise.reject(`Không khai báo đầy đủ các biến vào: model, arrJson hoặc không có dữ liệu để chèn`);
     }
     return new Promise(async (rs, rj) => {
-        let result = { table_name: model.getName(), count_insert: 0, count_fail: 0, group_batch: GROUP_COUNT }
+        let result = { table_name: model.getName(), count_insert: 0, count_fail: 0, group_batch: GROUP_COUNT };
+        const rejects = [];
         for (let i = 0; i < arrJson.length; i += GROUP_COUNT) {
             const insertModels = arrJson.slice(i, i + GROUP_COUNT).map((row) => {
                 // Mỗi đợt GROUP_COUNT chúng ta đưa vào mảng xử lý promise
-                return model.create(row)
+                return model.create(row);
             })
             // insertModels sẽ có 100 hoặc ít hơn các promise đang chờ xử lý.
             // Promise.all sẽ đợi cho đến khi tất cả các promise 
             // Promise.allSettled sẽ đợi cho đến khi tất cả các promise 
+            // thủ tục này yêu cầu nodejs từ 12.9 trở lên
             //đã được giải quyết và sau đó thực hiện 100 lần tiếp theo.
-            let rslt = await Promise.allSettled(insertModels)
-            // sử dụng allSettled sẽ trả về tất cả kết quả, không trả catch
-            // .catch(e => {
-            //     result.count_fail += 1
-            //     console.log(`Error in insert to database for the batch ${i} - ${e}`)
-            // })
+            let rslt = await Promise.allSettled(insertModels);
             if (rslt) {
                 if (isDebug) console.log(`Kết quả chèn:`, rslt)
                 // console.log(`Kết quả chèn thành công:`, rslt.map(x => x.status === "fulfilled"))
                 // console.log(`Kết quả chèn thất bại:`, rslt.map(x => x.status === "rejected"))
-                result.count_fail += rslt.filter(x => x.status === "rejected").length
-                result.count_insert += rslt.filter(x => x.status === "fulfilled").length
+                result.count_fail += rslt.filter(x => x.status === "rejected").length;
+                result.count_insert += rslt.filter(x => x.status === "fulfilled").length;
+                rejects.splice(rejects.length, 0, ...rslt.filter(x => x.status === "rejected"));
             }
         }
-        rs(result)
+        rs({
+            ...result,
+            rejects
+        })
     })
 }
 

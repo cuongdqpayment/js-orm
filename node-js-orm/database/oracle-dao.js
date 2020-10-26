@@ -753,7 +753,7 @@ class OracleDAO {
           if (result && result.rows && result.rows[0]) {
             resolve(this.ConvertKeysToLowerCase(result.rows[0])); //trả về là một json kết quả select nhu cua sqlite
           } else {
-            resolve(); //dua ve khong co bien nao, goi la undifined
+            resolve({}); //đưa về dòng không có giá trị
           }
         }
       );
@@ -878,7 +878,7 @@ class OracleDAO {
               }
               resolve(rows); //trả về là một json kết quả select nhu cua sqlite
             } else {
-              resolve(); //dua ve khong co bien nao, goi la undifined
+              resolve([]);   // đưa về mảng không có giá trị
             }
           }
         }
