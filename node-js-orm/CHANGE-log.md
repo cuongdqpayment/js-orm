@@ -1,3 +1,5 @@
+ver 2.2.0 add models dynamic for any models from client
+
 ver 2.1.3 fix oracle return object and array - importArray2Database return rejects
 
 ver 2.1.2 fix oracle connection for multi db

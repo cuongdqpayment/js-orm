@@ -513,6 +513,19 @@ module.exports = new YourModelName(db, tableName, json2Model.jsonText2Model(your
 
 # 10 select with limit and offset in oracle/mongodb/sqlite3
 ```js
+
+// where clauses:
+// * $lt <, 
+// * $lte <=, 
+// * $gt >, 
+// * $gte >=, 
+// * $ne !=, 
+// * $in [], 
+// * $nin [], 
+// * $like [],  *x* = %x%
+// * $null true/false, is null
+// * $exists true/false is not null
+
 // read where id=10
 db.selectAll({id:10}, {id:1,field:1}, {order_1: -1}, {limit:10, offset: 0})
 
@@ -533,5 +546,109 @@ db.selectAll({id:{$in:["1","2"]}}, {id:1,field:1}, {order_1: -1}, {limit:10, off
 // let jsonWheres = { order_1: { $exists: false } }
 // let jsonWheres = { order_1: { $ne: 1 } }
 // let jsonWheres = { order_1: { $nin: [ "1", "2", "5"] } }
+
+```
+
+# 11 Define any models follow jsonTextModels
+```js
+// define config for db such as: sqlite3
+const connJsonCfg = {
+    type: "sqlite3",
+    isDebug: true,
+    database: `${__dirname}/database/sample-test.db`,
+    auto_increment_support: true,
+};
+
+// user define config for table structure as ORM such as:
+const jsonTextModels = {
+  tables: {
+    table_name: {
+      type: 'STRING',
+      notNull: '1',
+      uniqueKeyMulti: 'table_name,  field_name',
+      length: '30'
+    },
+    field_name: { type: 'STRING', notNull: '1', length: '30' },
+    description: { type: 'STRING', length: '2000' },
+    data_type: { type: 'STRING', length: '20' },
+    options: { type: 'STRING', length: '500' },
+    option_index: { type: 'STRING', length: '10' },
+    orm_data_type: { type: 'STRING', notNull: '1', length: '20' },
+    orm_length: { type: 'INTEGER', length: '10' },
+    orm_not_null: { type: 'BOOLEAN', length: '1' },
+    orm_primary_key: { type: 'BOOLEAN', length: '1' },
+    orm_auto_increment: { type: 'BOOLEAN', length: '1' },
+    orm_is_unique: { type: 'BOOLEAN', length: '1' },
+    orm_unique_multi: { type: 'STRING', length: '100' },
+    orm_foreign_key: { type: 'STRING' },
+    orm_default_value: { type: 'STRING', length: '100' },
+    order_1: { type: 'INTEGER', length: '10' }
+  },
+  data_types: {
+    model: { type: 'STRING', notNull: '1', primaryKey: '1', length: '30' },
+    javascript: { type: 'STRING', length: '30' },
+    sqlite: { type: 'STRING', length: '30' },
+    oracle: { type: 'STRING', length: '30' },
+    mongodb: { type: 'STRING', length: '30' },
+    description: { type: 'STRING', length: '2000' }
+  }
+};
+
+// use lib
+const { models, database } = require("node-js-orm");
+
+// define connect to db
+const db = new database.NodeDatabase(connJsonCfg);
+
+// list of model in ORM
+const myModels = models(db,jsonTextModels);
+
+// list of model_name or table_name
+const tableModels = Object.keys(jsonTextModels);
+
+let myTable = "tables";
+
+let myModel = myModels[myTable];
+
+
+myModel.sync() // create table
+    .then(data => {
+        console.log('Data: ', data);
+    })
+    .catch(err => {
+        console.log('Lỗi: ', err);
+    });;
+
+myModel.getFirstRecord()
+    .then(data => {
+        console.log('Data: ', data);
+    })
+    .catch(err => {
+        console.log('Lỗi: ', err);
+    });;
+
+// get model for CRUD - create table, insert/import, select, update, delete
+// - this.sync() = create table
+// - this.getStructure() = return structure
+// - this.getName() = return table_name
+// - this.getDb() = return db (object database)
+// - this.create() = insert - C
+// - this.read()   = select - R
+// - this.update() = update - U
+// - this.delete() = delete - D
+// - this.readCount() return count of record in table
+// - this.readPage() = the same getPage()
+// - this.readAll() = select * or all from ... 
+
+// - getCount()
+// - getPage()
+// - getAllData()
+// - getFirstRecord()
+// - insertOneRecord()
+// - importRows()
+// - updateOneRecord()
+// - updateAll()
+// - deleteOneRecord()
+// - deleteAll()
 
 ```
