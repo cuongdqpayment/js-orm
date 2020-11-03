@@ -1,5 +1,5 @@
-### ORM for javascript with sqlite3, oracle, mongodb
-## Use with node 12.9 or later for Promise.allSettled
+# ORM for javascript in nodejs with sqlite3, oracle, mongodb
+### Use with node 12.9 or later for Promise.allSettled
 
 # 1. install
 ```sh
@@ -601,7 +601,7 @@ const { models, database } = require("node-js-orm");
 const db = new database.NodeDatabase(connJsonCfg);
 
 // list of model in ORM
-const myModels = models(db,jsonTextModels);
+const myModels = models(db, jsonTextModels);
 
 // list of model_name or table_name
 const tableModels = Object.keys(jsonTextModels);
@@ -650,5 +650,38 @@ myModel.getFirstRecord()
 // - updateAll()
 // - deleteOneRecord()
 // - deleteAll()
+
+```
+
+# 12 Select one record from db
+
+```js
+
+const { models, dbConnectionPool } = require("node-js-orm");
+
+// new one db for connection
+const db = dbConnectionPool( 
+  "sqlite3", // "mongodb" | "oracle" | "sqlite3"
+  true,      // true | false
+  `${rootDir}/db/database/test-sqlite.db`,
+  null, // no server
+  null, // no option
+  true  // debug
+  )
+
+// define json-text-models such as step 11 jsonTextModels in file ./json-text-models.js
+const jsonTextModels = require("./json-text-models");
+
+// init allModel from jsonText
+const myModels = models(db, jsonTextModels);
+
+// select first record from db
+myModels[1].getFirstRecord()
+    .then(data => {
+        console.log('Data: ', data);
+    })
+    .catch(err => {
+        console.log('Lỗi: ', err);
+    });
 
 ```
