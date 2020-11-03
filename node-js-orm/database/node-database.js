@@ -1,4 +1,7 @@
 /**
+ * 4.6 bổ sung hàm đợi kết nối csdl thành công
+ * waitingConnected()
+ * 
  *  4.5 ngày 10/10/2020
  * Bổ sung các mệnh đề $like, $null cho mongodb fix lỗi
  * Chuyển đổi dữ liệu string sang integer và float trước khi đưa vào mongo
@@ -20,6 +23,8 @@ const SQLiteDAO = require("./sqlite-dao"),
 const mongoWhere2Sql = require("./mongo-where-2-sql");
 
 const modelWhere2Mongo = require("./model-where-2-mongo");
+
+const { waiting } = require("cng-node-js-utils");
 
 // nếu không khai chuỗi kết nối thì nó tự tạo ra chuỗi default là sqlite3
 // const defaultCfg = {
@@ -162,11 +167,25 @@ class NodeDatabase {
   // phương thức kiểm tra kết nối db
   isConnected() {
     if (this.db) {
-      {
-        return this.db.isConnected();
-      }
+      return this.db.isConnected();
     }
     return false;
+  }
+
+  // Phương thức đợi csdl kết nối được sau 60 giây
+  waitingConnected() {
+    if (this.db) {
+      // đợi 1 phút để kết nối csdl, nếu csdl kết nối trước thì trả về ngay
+      return waiting(60000, { hasData: () => this.db.isConnected() })
+        .then(async (timeoutMsg) => {
+          if (!timeoutMsg) {
+            return true;
+          } else {
+            throw timeoutMsg;
+          }
+        })
+    }
+    return Promise.reject("No datatbase init");
   }
 
   /**

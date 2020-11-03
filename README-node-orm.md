@@ -174,3 +174,10 @@ cd node-js-orm
 npm publish
 cd ../
 ```
+
+## - Lệnh push lưu
+```sh
+git add .
+git commit -am "fix version 2.2.5"
+git push
+```

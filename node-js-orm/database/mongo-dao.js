@@ -135,6 +135,10 @@ class MongoDAO {
    * @param {*} max             // số bảng ghi (document) cực đại chứa trong bảng (collection)
    */
   createTable(tableName, jsonStructure, size, max) {
+    
+    if (!this.db){
+      return Promise.reject("No database init")
+    }
 
     return new Promise((rs, rj) => {
       this.db.listCollections({ name: tableName }).toArray(async (err, tbs) => {
