@@ -182,7 +182,7 @@ class SQLiteDAO {
    */
   createIndex(tableName, indexFields, indexName, isUnique) {
     return this.runSql(`CREATE ${isUnique ? "UNIQUE" : ""} 
-                        INDEX ${indexName} IF NOT EXISTS 
+                        INDEX IF NOT EXISTS ${indexName}
                         ON ${tableName} (${indexFields})`);
   }
 
