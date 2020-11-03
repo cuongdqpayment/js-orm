@@ -1,3 +1,5 @@
+ver 2.2.2 fix dbConnectionPool
+
 ver 2.2.1 add dbConnectionPool
 
 ver 2.2.0 add models dynamic for any models from client

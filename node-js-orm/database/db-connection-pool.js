@@ -54,7 +54,7 @@
   }; */
 
 // import components of orm model
-const { database } = require("node-js-orm");
+const NodeDatabase  = require("./node-database");
 
 /**
  *
@@ -73,7 +73,7 @@ module.exports = (
   options, // tùy chọn theo csdl (mongo thì thêm 2 tham số là isRoot và repset) (oracle thì khai pool kết nối)
   isDebug // để in ra các dòng debug nếu cần
 ) => {
-  return new database.NodeDatabase({
+  return new NodeDatabase({
     type, //  "mongodb" | "oracle" | "sqlite3"
     auto_increment_support: autoIncrementSupport,
     // tên cơ sở dữ liệu - Oracle thì là serviceName, mongodb thì tự khai tự tạo, sqlite thì tự khai tự tạo file riêng cho mỗi phiên
