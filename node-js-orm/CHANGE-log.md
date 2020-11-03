@@ -1,3 +1,5 @@
+ver 2.2.3 fix create INDEX IF NOT EXISTS
+
 ver 2.2.2 fix dbConnectionPool
 
 ver 2.2.1 add dbConnectionPool
