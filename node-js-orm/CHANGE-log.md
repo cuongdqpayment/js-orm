@@ -1,3 +1,5 @@
+ver 2.2.6 add listModels for create more models
+
 ver 2.2.6 add modelConfig for create table for import models config
 
 ver 2.2.5 add db.waitingConnected() return Promise
