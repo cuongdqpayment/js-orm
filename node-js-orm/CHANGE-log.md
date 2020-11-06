@@ -1,3 +1,5 @@
+ver 2.2.7 add db_type and db_name fỏ listModels
+
 ver 2.2.6 add listModels for create more models
 
 ver 2.2.6 add modelConfig for create table for import models config

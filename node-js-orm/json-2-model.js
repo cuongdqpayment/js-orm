@@ -130,13 +130,15 @@ module.exports = {
       isUnique: 1,
       length: 30,
     },
-    db_connection: { type: "STRING", notNull: 1, length: 30 },
+    db_type: { type: "STRING", length: 10 },
+    db_name: { type: "STRING", length: 255 },
+    db_connection: { type: "STRING", length: 30 },
     name: { type: "STRING", length: 255 },
     description: { type: "STRING", length: 2000 },
-    created_date: { type: 'DATE' },
-    updated_time: { type: 'DATETIME' },
-    updated_user: { type: 'STRING', length: 50 },
-    status: { type: 'BOOLEAN', defaultValue: 1 }
+    created_date: { type: "DATE" },
+    updated_time: { type: "DATETIME" },
+    updated_user: { type: "STRING", length: 50 },
+    status: { type: "BOOLEAN", defaultValue: 1 },
   },
   // Cấu hình lưu trữ mô hình
   modelConfig: {
