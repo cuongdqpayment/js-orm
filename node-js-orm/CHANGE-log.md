@@ -1,3 +1,5 @@
+ver 2.2.10 fix error data_type STRING = null ok
+
 ver 2.2.9 add updates and deletes for model
 
 ver 2.2.8 add db_type and db_name for listModels

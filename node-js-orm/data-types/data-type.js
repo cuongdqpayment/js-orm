@@ -49,8 +49,8 @@ class DataType {
         this.types.js !== "string") ||
         // kiểu số mà đưa vào chuỗi không đổi được số thì đưa ra lỗi
         (this.types.js === "number" && isNaN(value)) ||
-        // kiểu chuỗi mà đưa vào không phải số cũng không phải chuỗi thì lỗi
-        (this.types.js === "string" && typeof value !== "number") ||
+        // kiểu chuỗi mà đưa vào không phải số cũng không phải chuỗi và không phải là giá trị null
+        (this.types.js === "string" && typeof value !== "number" && value !== null) ||
         // kiểu js là boolean, kiểu dữ liệu đưa vào là không phải là số và cũng không phải là chuỗi -
         (this.types.js === "boolean" &&
           typeof value !== "number" &&
