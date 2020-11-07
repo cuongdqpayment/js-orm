@@ -143,11 +143,37 @@ class Model {
   }
 
   /**
+   * Update tất cả (mongodb phân biệt update 1 bảng ghi gặp đầu tiên thay vì update tất cả như DBMS thì không)
+   * @param {*} jsonData 
+   * @param {*} jsonWhere 
+   */
+  updates(jsonData, jsonWhere) {
+    try {
+      let jsonFilter = this.tableStructure
+        ? this.validFilter(jsonData)
+        : jsonData;
+      return this.db.updateWhere(this.tableName, jsonFilter, jsonWhere);
+    } catch (e) {
+      return this.errorPromise(e);
+    }
+  }
+
+  /**
    * Xóa bảng ghi có mệnh đề where theo json
    * @param {*} jsonWhere
    * @param {*} jsonOption
    */
   delete(jsonWhere, jsonOption) {
+    return this.db.deleteWhere(this.tableName, jsonWhere, jsonOption);
+  }
+
+
+  /**
+   * Xóa tất cả như cũ (mongodb phân biệt xóa tất cả và xóa 1 bảng ghi nhưng DBMS thì không)
+   * @param {*} jsonWhere 
+   * @param {*} jsonOption 
+   */
+  deletes(jsonWhere, jsonOption) {
     return this.db.deleteWhere(this.tableName, jsonWhere, jsonOption);
   }
 

@@ -1,4 +1,6 @@
-ver 2.2.6 add listModels for create more models
+ver 2.2.8 add updates, deletes
+
+ver 2.2.7 add listModels for create more models
 
 ver 2.2.6 add modelConfig for create table for import models config
 
