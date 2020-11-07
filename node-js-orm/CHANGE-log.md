@@ -1,4 +1,6 @@
-ver 2.2.8 add updates, deletes
+ver 2.2.9 add updates and deletes for model
+
+ver 2.2.8 add db_type and db_name for listModels
 
 ver 2.2.7 add listModels for create more models
 
