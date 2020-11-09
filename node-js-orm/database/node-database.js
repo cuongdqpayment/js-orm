@@ -83,7 +83,7 @@ class NodeDatabase {
    */
   constructor(connCfg) {
 
-    console.log(` ***> START connect to Database\n -----> ${(connCfg?connCfg.database:`Unknow database`)}`);
+    console.log(` ***> START connect to Database ${connCfg.type}\n -----> ${connCfg.database}`);
 
     this.cfg = connCfg;
     switch (this.cfg.type) {

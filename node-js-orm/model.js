@@ -2,10 +2,10 @@
  * 5.0 Thay đổi update/updates, delete/deletes
  * Để thực hiện update/delete cho 1 bảng ghi, nhiều bảng ghi phù hợp với API cung cấp ra bên ngoài
  * Hạn chế các thao tác update/delete làm hỏng dữ liệu
- * 
+ *
  * 4.5 ngày 10/10/2020
  * Bổ sung các mệnh đề $lt,$gt,$in
- * 
+ *
  * Đây là đối tượng giao tiếp model CRUD chứa các phương thức tạo ra mô hình bất kỳ
  * Nó tương đương một bảng trong csdl, có thể lấy 1 bảng ghi
  * Chứa thông tin cấu trúc dữ liệu giao tiếp giữa form và giữa csdl
@@ -22,7 +22,7 @@
  * Và nó chỉ lọc lấy những dữ liệu đã được định nghĩa theo mô hình, còn các trường khác sẽ bị loại bỏ (thừa)
  *
  * Các ràng buộc dữ liệu không xử lý ở đây, mà chỉ csdl sẽ xử lý để đơn giản hóa khâu này
- * 
+ *
  * fix true data ok 2020-09-10
  */
 
@@ -76,25 +76,28 @@ class Model {
    * Phục vụ cho việc định nghĩa bằng tay, từ excel khai báo
    */
   getStructure() {
-    return JSON.stringify(this.tableStructure, (key, value) => {
-      if (key === "type" || value === "" || value === null) return undefined
-      return value
-    }, 2)
+    return JSON.stringify(
+      this.tableStructure,
+      (key, value) => {
+        if (key === "type" || value === "" || value === null) return undefined;
+        return value;
+      },
+      2
+    );
   }
 
   /**
    * Trả về tên mô hình để biết mô hình thuộc bảng dữ liệu nào
    */
   getName() {
-    return this.tableName
+    return this.tableName;
   }
-
 
   /**
    * Trả db của chính nó
    */
   getDb() {
-    return this.db
+    return this.db;
   }
 
   /**
@@ -116,7 +119,7 @@ class Model {
   }
 
   /**
-   * chèn vào csdl
+   * Chèn một bảng ghi mới vào csdl - trường hợp chèn nhiều thì sử dụng phương thức chèn nhiều trong chức năng import
    * @param {*} jsonData
    */
   async create(jsonData) {
@@ -125,7 +128,13 @@ class Model {
       let jsonFilter = this.validFilter(jsonData);
       let jsonDaoDataAutoIncrement = await this.checkAutoIncrement(jsonFilter);
       let jsonDaoData = this.convertTrueData(jsonDaoDataAutoIncrement);
-      return this.db.insertOne(this.tableName, jsonDaoData);
+      // kiểm tra nếu lỗi thì trả về mã lỗi và câu sql gốc
+      return this.db.insertOne(this.tableName, jsonDaoData).catch((error) => {
+        throw {
+          data: jsonDaoData,
+          error,
+        };
+      });
     } catch (e) {
       return this.errorPromise(e);
     }
@@ -148,8 +157,8 @@ class Model {
 
   /**
    * Update tất cả (mongodb phân biệt update 1 bảng ghi gặp đầu tiên thay vì update tất cả như DBMS thì không)
-   * @param {*} jsonData 
-   * @param {*} jsonWhere 
+   * @param {*} jsonData
+   * @param {*} jsonWhere
    */
   updateAll(jsonData, jsonWhere) {
     try {
@@ -171,11 +180,10 @@ class Model {
     return this.db.deleteOne(this.tableName, jsonWhere, jsonOption);
   }
 
-
   /**
    * Xóa tất cả như cũ (mongodb phân biệt xóa tất cả và xóa 1 bảng ghi nhưng DBMS thì không)
-   * @param {*} jsonWhere 
-   * @param {*} jsonOption 
+   * @param {*} jsonWhere
+   * @param {*} jsonOption
    */
   deleteAll(jsonWhere, jsonOption) {
     return this.db.deleteAll(this.tableName, jsonWhere, jsonOption);
@@ -193,30 +201,35 @@ class Model {
 
   /**
    * Lấy toàn bộ bảng ghi theo mệnh đề where
-   * @param {*} jsonWhere  // ex: {id: 5, status: "OFF"} = where id = 5 and status = 'OFF' 
+   * @param {*} jsonWhere  // ex: {id: 5, status: "OFF"} = where id = 5 and status = 'OFF'
    * @param {*} jsonFields // ex: {id:1,field:1} = select id, field from ...
    * @param {*} jsonSort   // ex: {id: -1} = order by id desc
    * @param {*} jsonPaging // ex: {limit:10 , offset:5}
    */
   readAll(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
-    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, jsonPaging);
+    return this.db.selectAll(
+      this.tableName,
+      jsonWhere,
+      jsonFields,
+      jsonSort,
+      jsonPaging
+    );
   }
-
 
   /**
    * Chỉ đọc số liệu bảng ghi trong một bảng
-   * @param {*} jsonWhere 
+   * @param {*} jsonWhere
    */
   readCount(jsonWhere = {}) {
-    return this.db.selectCount(this.tableName, jsonWhere)
+    return this.db.selectCount(this.tableName, jsonWhere);
   }
 
   /**
    * Truy vấn số lượng bảng ghi của một trang
-   * Dữ liệu đầu vào là 
-   * @param {*} jsonWhere 
-   * @param {*} jsonFields 
-   * @param {*} jsonSort 
+   * Dữ liệu đầu vào là
+   * @param {*} jsonWhere
+   * @param {*} jsonFields
+   * @param {*} jsonSort
    * @param {*} jsonPage { page , limit, total}
    */
   readPage(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPage = {}) {
@@ -233,12 +246,28 @@ class Model {
     }
     let offset = limit * (page - 1);
     if ((total && offset > total) || page <= 0) {
-      return Promise.resolve({ page, data: [], limit, next_page: 1, length: 0 });
+      return Promise.resolve({
+        page,
+        data: [],
+        limit,
+        next_page: 1,
+        length: 0,
+      });
     }
-    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, { limit, offset })
-      .then(data => {
-        return { page, data, limit, next_page: data.length < limit ? 1 : page + 1, length: data.length };
+    return this.db
+      .selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, {
+        limit,
+        offset,
       })
+      .then((data) => {
+        return {
+          page,
+          data,
+          limit,
+          next_page: data.length < limit ? 1 : page + 1,
+          length: data.length,
+        };
+      });
   }
 
   /**
@@ -318,10 +347,10 @@ class Model {
       let el = this.tableStructure[key];
       let value = jsonData[key];
       if (value !== undefined) {
-
-        let trueData = el && el.type
-          ? this.getTrueData(value, el.type)
-          : this.getTrueData(value, el);
+        let trueData =
+          el && el.type
+            ? this.getTrueData(value, el.type)
+            : this.getTrueData(value, el);
 
         Object.defineProperty(filter, key, {
           value: trueData,

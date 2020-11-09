@@ -1,4 +1,6 @@
 
+ver 3.0.2 importRowsUpdates
+
 ver 3.0.1 change structure for update/updateAll, delete/deleteAll, select/selectAll - One and Many
 
 ver 2.2.10 fix error data_type STRING = null ok
