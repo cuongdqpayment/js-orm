@@ -159,41 +159,41 @@ class DynamicModel extends Model {
       )
       .then(async (results) => {
         // đọc kết quả lấy trường rejects
-        let updates = { count: 0, fail: 0, rejects: [] };
+        let updates;
 
         if (
           results &&
           results.rejects &&
           Array.isArray(results.rejects) &&
-          results.rejects.data &&
-          results.rejects.error &&
           whereKeys &&
           Array.isArray(whereKeys)
         ) {
-          // thực hiện update nếu trùng
-          //   console.log("Bảng ghi lỗi:", results.rejects.data);
-          let jsonData = results.rejects.data;
-          // trích xuất jsonWhere ra để update
-          let jsonWhere = {};
-          for (let key of whereKeys) {
-            // giá trị
-            if (jsonData[key] !== undefined) {
-              // có khóa này trong json data thì khai báo cho mệnh đề where
-              jsonWhere[key] = jsonData[key];
-            }
-          }
-          if (Object.keys(jsonWhere).length) {
-            // có tham số mệnh đề where
-            // thực hiện update từng bảng ghi để ghi ra kết quả
-            let uExec = await this.update(jsonData, jsonWhere).catch(
-              (error) => {
-                // lỗi không update được
-                updates.fail++;
-                updates.rejects.push(error);
+          updates = { count_update: 0, count_fail: 0, rejects: [] };
+          for (let reject of results.rejects) {
+            if (reject && reject.reason && reject.reason.data) {
+              let jsonData = reject.reason.data;
+              // trích xuất jsonWhere ra để update
+              let jsonWhere = {};
+              for (let key of whereKeys) {
+                if (jsonData[key] !== undefined) {
+                  // có khóa này trong json data thì khai báo cho mệnh đề where
+                  jsonWhere[key] = jsonData[key];
+                }
               }
-            );
-            if (uExec) {
-              updates.count++;
+              if (Object.keys(jsonWhere).length) {
+                // có tham số mệnh đề where
+                // thực hiện update từng bảng ghi để ghi ra kết quả
+                let uExec = await this.update(jsonData, jsonWhere).catch(
+                  (error) => {
+                    // lỗi không update được
+                    updates.count_fail++;
+                    updates.rejects.push(error);
+                  }
+                );
+                if (uExec) {
+                  updates.count_update++;
+                }
+              }
             }
           }
         }
