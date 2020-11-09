@@ -1,5 +1,9 @@
 /**
- *  * 4.5 ngày 10/10/2020
+ * 5.0 Thay đổi update/updates, delete/deletes
+ * Để thực hiện update/delete cho 1 bảng ghi, nhiều bảng ghi phù hợp với API cung cấp ra bên ngoài
+ * Hạn chế các thao tác update/delete làm hỏng dữ liệu
+ * 
+ * 4.5 ngày 10/10/2020
  * Bổ sung các mệnh đề $lt,$gt,$in
  * 
  * Đây là đối tượng giao tiếp model CRUD chứa các phương thức tạo ra mô hình bất kỳ
@@ -136,7 +140,7 @@ class Model {
       let jsonFilter = this.tableStructure
         ? this.validFilter(jsonData)
         : jsonData;
-      return this.db.updateWhere(this.tableName, jsonFilter, jsonWhere);
+      return this.db.updateOne(this.tableName, jsonFilter, jsonWhere);
     } catch (e) {
       return this.errorPromise(e);
     }
@@ -147,12 +151,12 @@ class Model {
    * @param {*} jsonData 
    * @param {*} jsonWhere 
    */
-  updates(jsonData, jsonWhere) {
+  updateAll(jsonData, jsonWhere) {
     try {
       let jsonFilter = this.tableStructure
         ? this.validFilter(jsonData)
         : jsonData;
-      return this.db.updateWhere(this.tableName, jsonFilter, jsonWhere);
+      return this.db.updateAll(this.tableName, jsonFilter, jsonWhere);
     } catch (e) {
       return this.errorPromise(e);
     }
@@ -164,7 +168,7 @@ class Model {
    * @param {*} jsonOption
    */
   delete(jsonWhere, jsonOption) {
-    return this.db.deleteWhere(this.tableName, jsonWhere, jsonOption);
+    return this.db.deleteOne(this.tableName, jsonWhere, jsonOption);
   }
 
 
@@ -173,8 +177,8 @@ class Model {
    * @param {*} jsonWhere 
    * @param {*} jsonOption 
    */
-  deletes(jsonWhere, jsonOption) {
-    return this.db.deleteWhere(this.tableName, jsonWhere, jsonOption);
+  deleteAll(jsonWhere, jsonOption) {
+    return this.db.deleteAll(this.tableName, jsonWhere, jsonOption);
   }
 
   /**
@@ -186,6 +190,18 @@ class Model {
   read(jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
     return this.db.selectOne(this.tableName, jsonWhere, jsonFields, jsonSort);
   }
+
+  /**
+   * Lấy toàn bộ bảng ghi theo mệnh đề where
+   * @param {*} jsonWhere  // ex: {id: 5, status: "OFF"} = where id = 5 and status = 'OFF' 
+   * @param {*} jsonFields // ex: {id:1,field:1} = select id, field from ...
+   * @param {*} jsonSort   // ex: {id: -1} = order by id desc
+   * @param {*} jsonPaging // ex: {limit:10 , offset:5}
+   */
+  readAll(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
+    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, jsonPaging);
+  }
+
 
   /**
    * Chỉ đọc số liệu bảng ghi trong một bảng
@@ -223,17 +239,6 @@ class Model {
       .then(data => {
         return { page, data, limit, next_page: data.length < limit ? 1 : page + 1, length: data.length };
       })
-  }
-
-  /**
-   * Lấy toàn bộ bảng ghi theo mệnh đề where
-   * @param {*} jsonWhere  // ex: {id: 5, status: "OFF"} = where id = 5 and status = 'OFF' 
-   * @param {*} jsonFields // ex: {id:1,field:1} = select id, field from ...
-   * @param {*} jsonSort   // ex: {id: -1} = order by id desc
-   * @param {*} jsonPaging // ex: {limit:10 , offset:5}
-   */
-  readAll(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
-    return this.db.selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, jsonPaging);
   }
 
   /**

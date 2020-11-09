@@ -255,7 +255,7 @@ class MongoDAO {
    * @param {*} tableName
    * @param {*} jsonArray
    */
-  inserts(tableName, jsonArray) {
+  insertAll(tableName, jsonArray) {
     return new Promise(async (rs, rj) => {
       if (this.isOpen) {
         try {
@@ -304,7 +304,7 @@ class MongoDAO {
    * @param {*} jsonData
    * @param {*} jsonOption
    */
-  updates(tableName, jsonWhere = {}, jsonData = {}, jsonOption = {}) {
+  updateAll(tableName, jsonWhere = {}, jsonData = {}, jsonOption = {}) {
     return new Promise(async (rs, rj) => {
       if (this.isOpen) {
         try {
@@ -351,7 +351,7 @@ class MongoDAO {
    * @param {*} jsonWhere
    * @param {*} jsonOption
    */
-  deletes(tableName, jsonWhere = {}, jsonOption = {}) {
+  deleteAll(tableName, jsonWhere = {}, jsonOption = {}) {
     return new Promise(async (rs, rj) => {
       if (this.isOpen) {
         try {
@@ -393,28 +393,6 @@ class MongoDAO {
   }
 
   /**
-   * Đếm số lượng bảng ghi (documents) trong bảng (collection)
-   * @param {*} tableName 
-   * @param {*} jsonWhere 
-   */
-  selectCount(tableName, jsonWhere = {}) {
-    return new Promise(async (rs, rj) => {
-      if (this.isOpen) {
-        try {
-          let cursor = await this.db
-            .collection(tableName)
-            .find(jsonWhere);
-          var rtn = await cursor.count();
-          rs(rtn);
-        } catch (e) {
-          rj(e);
-        }
-      } else rj("Database not Open for selects!");
-    });
-  }
-
-
-  /**
    * jsonWhere tra cứu cấu trúc lệnh collection.find() trong mongo
    * jsonSort tra cứu cấu trúc lệnh Cursor.sort() trong mongo
    * @param {*} tableName Tên bảng để lấy dữ liệu
@@ -440,6 +418,28 @@ class MongoDAO {
     });
   }
 
+
+  /**
+   * Đếm số lượng bảng ghi (documents) trong bảng (collection)
+   * @param {*} tableName 
+   * @param {*} jsonWhere 
+   */
+  selectCount(tableName, jsonWhere = {}) {
+    return new Promise(async (rs, rj) => {
+      if (this.isOpen) {
+        try {
+          let cursor = await this.db
+            .collection(tableName)
+            .find(jsonWhere);
+          var rtn = await cursor.count();
+          rs(rtn);
+        } catch (e) {
+          rj(e);
+        }
+      } else rj("Database not Open for selects!");
+    });
+  }
+  
   /**
    * Lấy bảng ghi đầu chèn vào đầu tiên
    * @param {*} tableName

@@ -29,11 +29,13 @@ class DynamicModel extends Model {
     - this.getDb() = trả về csdl của mô hình đang kết nối (đối tượng database)
     - this.create() = insert - C
     - this.read()   = select - R
+    - this.readAll() = select * or all from ... 
     - this.update() = update - U
+    - this.updateAll() = update - U
     - this.delete() = delete - D
+    - this.deleteAll() = delete - D
     - this.readCount() trả về số lượng bảng ghi của bảng theo mệnh đề where
     - this.readPage() = tương đương getPage()
-    - this.readAll() = select * or all from ... 
      */
 
     //... Viết các phương thức riêng của mô hình ở đây
@@ -145,7 +147,7 @@ class DynamicModel extends Model {
      * @param {*} jsonWhere 
      */
     updateAll(jsonData, jsonWhere) {
-        return this.updates(jsonData, jsonWhere);
+        return this.updateAll(jsonData, jsonWhere);
     }
 
     /**
@@ -161,7 +163,7 @@ class DynamicModel extends Model {
      * @param {*} jsonWhere 
      */
     deleteAll(jsonWhere) {
-        return this.deletes(jsonWhere);
+        return this.deleteAll(jsonWhere);
     }
 
     // ... Bạn có thể chèn vào các phương thức, hàm riêng để thao tác với cơ sở dữ liệu, để trả kết quả cho người dùng

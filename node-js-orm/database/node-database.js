@@ -82,7 +82,7 @@ class NodeDatabase {
   auto_increment_support: false,
    */
   constructor(connCfg) {
-    console.log("START connect to Database ...");
+    console.log(` ***> START connect to Database\n -----> ${this.cfg.database}`);
     this.cfg = connCfg;
     switch (this.cfg.type) {
       case "sqlite3":
@@ -196,6 +196,13 @@ class NodeDatabase {
   }
 
   /**
+   * Trả về kết nối csdl là gì để biết mô hình của nó dùng kết nối csdl nào
+   */
+  getDbConfig() {
+    return this.cfg;
+  }
+
+  /**
    * Hàm trả về undefined nếu csdl có hỗ trợ auto increment
    * trả về giá trị id cực đại nếu không hỗ trợ auto increment
    */
@@ -259,17 +266,18 @@ class NodeDatabase {
   }
 
   /**
-   * update theo mệnh đề where
-   * 
+   * Update chỉ 1 bảng ghi
+   * Vì lý do bảo mật csdl - tránh việc quên truyền where làm update toàn bộ dữ liệu đã lưu
+   * sẽ không biết chính xác bảng ghi nào được update
    * @param {*} tableName 
    * @param {*} jsonData = chứa cấu trúc theo bảng, key = tên trường, value = giá trị của trường đó
    * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    */
-  updateWhere(tableName, jsonData = {}, jsonWhere = {}) {
+  updateOne(tableName, jsonData = {}, jsonWhere = {}) {
     if (this.db instanceof MongoDAO) {
       // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
       // tuy nhiên phù hợp với csdl sql khác thì nó có update tất cả bảng ghi thỏa điều kiện
-      return this.db.updates(tableName, modelWhere2Mongo(jsonWhere), jsonData);
+      return this.db.update(tableName, modelWhere2Mongo(jsonWhere), jsonData);
     } else if (this.db !== null) {
       return this.db.update(
         this.convertDaoFromMongo(tableName, jsonWhere, jsonData)
@@ -277,20 +285,57 @@ class NodeDatabase {
     } else return this.errorPromise();
   }
 
+
   /**
-   * xóa theo mệnh đề where
-   * 
+   * Update toàn bộ các bảng ghi
+   * Vì lý do bảo mật csdl - tránh việc quên truyền where làm update toàn bộ dữ liệu đã lưu
+   * @param {*} tableName 
+   * @param {*} jsonData 
+   * @param {*} jsonWhere 
+   */
+  updateAll(tableName, jsonData = {}, jsonWhere = {}) {
+    if (this.db instanceof MongoDAO) {
+      // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
+      // tuy nhiên phù hợp với csdl sql khác thì nó có update tất cả bảng ghi thỏa điều kiện
+      return this.db.updateAll(tableName, modelWhere2Mongo(jsonWhere), jsonData);
+    } else if (this.db !== null) {
+      return this.db.updateAll(
+        this.convertDaoFromMongo(tableName, jsonWhere, jsonData)
+      );
+    } else return this.errorPromise();
+  }
+
+  /**
+   * Xóa 1 bảng ghi
+   * Vì lý do bảo mật csdl - tránh việc quên truyền where làm xóa toàn bộ dữ liệu đã lưu
    * @param {*} tableName 
    * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    * @param {*} jsonOption = chỉ dùng cho mongo db (tra tham số options của mongo để dùng)
    */
-  deleteWhere(tableName, jsonWhere = {}, jsonOption = {}) {
+  deleteOne(tableName, jsonWhere = {}, jsonOption = {}) {
     if (this.db instanceof MongoDAO) {
       // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
-      return this.db.deletes(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
+      return this.db.delete(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
     } else if (this.db !== null) {
       // với dữ liệu sql thì sử dụng mệnh đề where đúng không xóa 1 bảng ghi
       return this.db.delete(this.convertDaoFromMongo(tableName, jsonWhere));
+    } else return this.errorPromise();
+  }
+
+  /**
+   * Xóa tất cả các bảng ghi yêu cầu phải có mệnh đề where
+   * Vì lý do bảo mật csdl - tránh việc quên truyền where làm xóa toàn bộ dữ liệu đã lưu
+   * @param {*} tableName 
+   * @param {*} jsonWhere 
+   * @param {*} jsonOption 
+   */
+  deleteAll(tableName, jsonWhere = {}, jsonOption = {}) {
+    if (this.db instanceof MongoDAO) {
+      // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
+      return this.db.deleteALL(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
+    } else if (this.db !== null) {
+      // với dữ liệu sql thì sử dụng mệnh đề where đúng không xóa 1 bảng ghi
+      return this.db.deleteALL(this.convertDaoFromMongo(tableName, jsonWhere));
     } else return this.errorPromise();
   }
 
@@ -310,6 +355,28 @@ class NodeDatabase {
         this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort)
       );
     } else return this.errorPromise();
+  }
+
+  /**
+   * truy vấn tất cả bảng ghi
+   * select ...jsonFields from ...tableName 
+   * where ...jsonWhere 
+   * order by ...jsonSort 
+   * limit ... offset ...jsonPaging
+   * @param {*} tableName 
+   * @param {*} jsonWhere {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
+   * @param {*} jsonFields {field_name_i:1 | 0,...} = liệt kê các trường cần lấy
+   * @param {*} jsonSort {field_name: 1 | -1} = sắp xếp theo từ thấp đến cao =1 hoặc từ cao xuống thấp =-1
+   * @param {*} jsonPaging {limit: x, offset: y} trong đó x là số lượng bảng ghi trả về, y là bắt đầu lấy từ bản ghi thứ y
+   */
+  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
+    if (this.db instanceof MongoDAO) {
+      return this.db.selectAll(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort, { ...jsonPaging, skip: jsonPaging.offset });
+    } else if (this.db !== null) {
+      return this.db.selectAll(
+        this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort, jsonPaging)
+      );
+    } else return this.errorPromise("Lỗi truy vấn dữ liệu");
   }
 
   /**
@@ -345,28 +412,6 @@ class NodeDatabase {
           return rst.cnt_;
         })
     } else return Promise.reject("Không có dữ liệu để truy vấn");
-  }
-
-  // truy vấn tất cả bảng ghi
-  /**
-   * select ...jsonFields from ...tableName 
-   * where ...jsonWhere 
-   * order by ...jsonSort 
-   * limit ... offset ...jsonPaging
-   * @param {*} tableName 
-   * @param {*} jsonWhere {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
-   * @param {*} jsonFields {field_name_i:1 | 0,...} = liệt kê các trường cần lấy
-   * @param {*} jsonSort {field_name: 1 | -1} = sắp xếp theo từ thấp đến cao =1 hoặc từ cao xuống thấp =-1
-   * @param {*} jsonPaging {limit: x, offset: y} trong đó x là số lượng bảng ghi trả về, y là bắt đầu lấy từ bản ghi thứ y
-   */
-  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
-    if (this.db instanceof MongoDAO) {
-      return this.db.selectAll(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort, { ...jsonPaging, skip: jsonPaging.offset });
-    } else if (this.db !== null) {
-      return this.db.selectAll(
-        this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort, jsonPaging)
-      );
-    } else return this.errorPromise("Lỗi truy vấn dữ liệu");
   }
 
   // chuyển đổi mệnh đề select trong mongo cho selectDAO --> sql bình thường

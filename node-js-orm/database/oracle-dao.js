@@ -525,7 +525,7 @@ class OracleDAO {
    *                  }
    */
   update(updateTable) {
-    let sql = "UPDATE " + updateTable.name + " SET ";
+    let sql = `UPDATE ${updateTable.name} SET `;
 
     let i = 0;
     let idx = 0;
@@ -554,43 +554,142 @@ class OracleDAO {
       }
     }
 
+    let sqlWhere = "";
     idx = 0;
     i = 0;
     for (let col of updateTable.wheres) {
       if (col.value != undefined && col.value != null) {
         if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
           if (i == 0) {
-            sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
+            sqlWhere += ` WHERE ${col.name}=${col.value.substring(3)}`;
           } else {
-            sql += ` AND ${col.name}=${col.value.substring(3)}`;
+            sqlWhere += ` AND ${col.name}=${col.value.substring(3)}`;
           }
           i++;
         } else if (Array.isArray(col.value)) {
           // ver 4.0 bổ sung mệnh đề in trong where
           if (i++ == 0) {
-            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+            sqlWhere += ` WHERE ${col.name} in ('${value.join("','")}')`;
           } else {
-            sql += ` AND ${col.name} in ('${value.join("','")}')`;
+            sqlWhere += ` AND ${col.name} in ('${value.join("','")}')`;
           }
         } else if (typeof col.value === "object") {
           // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
           let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
           i = iOut;
-          sql += whereS;
+          sqlWhere += whereS;
           // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
           if (i == 0) {
-            sql += ` WHERE ${col.name}= :${idx++}`;
+            sqlWhere += ` WHERE ${col.name}= :${idx++}`;
           } else {
-            sql += ` AND ${col.name}= :${idx++}`;
+            sqlWhere += ` AND ${col.name}= :${idx++}`;
           }
           i++;
         }
-      } else {
-        sql += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
+      }
+      /*  else {
+        sqlWhere += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
+      } */
+    }
+
+    // không cho phép update toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for UPDATE by Model");
+    }
+
+    // bổ sung mệnh đề AND ROWNUM = 1 - chỉ lấy 1 bảng ghi ra thôi
+    sqlWhere += ` AND ROWNUM = 1`;
+
+    sql += sqlWhere;
+
+    return this.runSql(sql, params);
+  }
+
+
+  /**
+   * Update tất cả các bảng ghi
+   * @param {*} updateTable 
+   */
+  updateAll(updateTable) {
+
+    let sql = `UPDATE ${updateTable.name} SET `;
+
+    let i = 0;
+    let idx = 0;
+    let params = [];
+    for (let col of updateTable.cols) {
+      if (col.value != undefined && col.value != null) {
+        //neu gia tri khong phai undefined moi duoc thuc thi
+        // nếu chèn vào kiểu hàm của oracle thì tường minh hàm luôn
+        // ví dụ hàm to_date, ...
+        if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
+          if (i == 0) {
+            sql += col.name + "=" + col.value.substring(3);
+          } else {
+            sql += ", " + col.name + "=" + col.value.substring(3);
+          }
+          i++;
+        } else {
+          params.push(col.value);
+          if (i == 0) {
+            sql += col.name + "= :" + idx++;
+          } else {
+            sql += ", " + col.name + "= :" + idx++;
+          }
+          i++;
+        }
       }
     }
+
+    let sqlWhere = "";
+    idx = 0;
+    i = 0;
+    for (let col of updateTable.wheres) {
+      if (col.value != undefined && col.value != null) {
+        if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
+          if (i == 0) {
+            sqlWhere += ` WHERE ${col.name}=${col.value.substring(3)}`;
+          } else {
+            sqlWhere += ` AND ${col.name}=${col.value.substring(3)}`;
+          }
+          i++;
+        } else if (Array.isArray(col.value)) {
+          // ver 4.0 bổ sung mệnh đề in trong where
+          if (i++ == 0) {
+            sqlWhere += ` WHERE ${col.name} in ('${value.join("','")}')`;
+          } else {
+            sqlWhere += ` AND ${col.name} in ('${value.join("','")}')`;
+          }
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sqlWhere += whereS;
+          // console.log("--->", iOut, whereS);
+        } else {
+          params.push(col.value);
+          if (i == 0) {
+            sqlWhere += ` WHERE ${col.name}= :${idx++}`;
+          } else {
+            sqlWhere += ` AND ${col.name}= :${idx++}`;
+          }
+          i++;
+        }
+      }
+      /* else {
+        sql += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
+      } */
+    }
+
+    // không cho phép update toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for UPDATE by Model");
+    }
+
+    sql += sqlWhere;
+
     return this.runSql(sql, params);
   }
 
@@ -600,46 +699,125 @@ class OracleDAO {
    * @param {*} id
    */
   delete(deleteTable) {
-    let sql = "DELETE FROM " + deleteTable.name;
+
+    let sql = `DELETE FROM ${deleteTable.name}`;
+
     let i = 0;
     let idx = 0;
     let params = [];
+
+    let sqlWhere = "";
     for (let col of deleteTable.wheres) {
       if (col.value != undefined && col.value != null) {
         if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
           if (i == 0) {
-            sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
+            sqlWhere += ` WHERE ${col.name}=${col.value.substring(3)}`;
           } else {
-            sql += ` AND ${col.name}=${col.value.substring(3)}`;
+            sqlWhere += ` AND ${col.name}=${col.value.substring(3)}`;
           }
           i++;
         } else if (Array.isArray(col.value)) {
           // ver 4.0 bổ sung mệnh đề in trong where
           if (i++ == 0) {
-            sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+            sqlWhere += ` WHERE ${col.name} in ('${value.join("','")}')`;
           } else {
-            sql += ` AND ${col.name} in ('${value.join("','")}')`;
+            sqlWhere += ` AND ${col.name} in ('${value.join("','")}')`;
           }
         } else if (typeof col.value === "object") {
           // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
           let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
           i = iOut;
-          sql += whereS;
+          sqlWhere += whereS;
           // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
           if (i == 0) {
-            sql += ` WHERE ${col.name}= :${idx++}`;
+            sqlWhere += ` WHERE ${col.name}= :${idx++}`;
           } else {
-            sql += ` AND ${col.name}= :${idx++}`;
+            sqlWhere += ` AND ${col.name}= :${idx++}`;
           }
           i++; //tang i len 1
         }
-      } else {
-        sql += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
       }
+      /* else {
+        sqlWhere += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
+      } */
     }
+
+    // không cho phép update toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for UPDATE by Model");
+    }
+
+    // bổ sung mệnh đề AND ROWNUM = 1 - chỉ lấy 1 bảng ghi ra thôi
+    sqlWhere += ` AND ROWNUM = 1`;
+
+    sql += sqlWhere;
+
     return this.runSql(sql, params);
+  }
+
+
+  /**
+   * Xóa nhiều bảng ghi
+   * @param {*} deleteTable 
+   */
+  deleteAll(deleteTable) {
+
+    let sql = `DELETE FROM ${deleteTable.name}`;
+    let i = 0;
+    let idx = 0;
+    let params = [];
+
+    let sqlWhere = "";
+    for (let col of deleteTable.wheres) {
+      if (col.value != undefined && col.value != null) {
+        if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
+          if (i == 0) {
+            sqlWhere += ` WHERE ${col.name}=${col.value.substring(3)}`;
+          } else {
+            sqlWhere += ` AND ${col.name}=${col.value.substring(3)}`;
+          }
+          i++;
+        } else if (Array.isArray(col.value)) {
+          // ver 4.0 bổ sung mệnh đề in trong where
+          if (i++ == 0) {
+            sqlWhere += ` WHERE ${col.name} in ('${value.join("','")}')`;
+          } else {
+            sqlWhere += ` AND ${col.name} in ('${value.join("','")}')`;
+          }
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sqlWhere += whereS;
+          // console.log("--->", iOut, whereS);
+        } else {
+          params.push(col.value);
+          if (i == 0) {
+            sqlWhere += ` WHERE ${col.name}= :${idx++}`;
+          } else {
+            sqlWhere += ` AND ${col.name}= :${idx++}`;
+          }
+          i++; //tang i len 1
+        }
+      }
+      /* 
+      else {
+        sql += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
+      } 
+      */
+    }
+
+    // không cho phép delete toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for DELETES by Model");
+    }
+
+    sql += sqlWhere;
+
+    return this.runSql(sql, params);
+
   }
 
   //
@@ -649,6 +827,7 @@ class OracleDAO {
    * @param {*} selectTable
    */
   select(selectTable) {
+
     let params = [];
     let sql = `SELECT * FROM ${selectTable.name}`;
 
@@ -668,41 +847,52 @@ class OracleDAO {
 
     i = 0;
     let idx = 0;
+    let sqlWhere = "";
     if (selectTable.wheres) {
       for (let col of selectTable.wheres) {
         if (col.value != undefined && col.value != null) {
           if (typeof col.value === "string" && col.value.indexOf("__$") === 0) {
             if (i == 0) {
-              sql += ` WHERE ${col.name}=${col.value.substring(3)}`;
+              sqlWhere += ` WHERE ${col.name}=${col.value.substring(3)}`;
             } else {
-              sql += ` AND ${col.name}=${col.value.substring(3)}`;
+              sqlWhere += ` AND ${col.name}=${col.value.substring(3)}`;
             }
             i++;
           } else if (Array.isArray(col.value)) {
             // ver 4.0 bổ sung mệnh đề in trong where
             if (i++ == 0) {
-              sql += ` WHERE ${col.name} in ('${value.join("','")}')`;
+              sqlWhere += ` WHERE ${col.name} in ('${value.join("','")}')`;
             } else {
-              sql += ` AND ${col.name} in ('${value.join("','")}')`;
+              sqlWhere += ` AND ${col.name} in ('${value.join("','")}')`;
             }
           } else if (typeof col.value === "object") {
             // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
             let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
             i = iOut;
-            sql += whereS;
+            sqlWhere += whereS;
             // console.log("--->", iOut, whereS);
           } else {
             params.push(col.value);
             if (i == 0) {
-              sql += ` WHERE ${col.name}= :${idx++}`;
+              sqlWhere += ` WHERE ${col.name}= :${idx++}`;
             } else {
-              sql += ` AND ${col.name}= :${idx++}`;
+              sqlWhere += ` AND ${col.name}= :${idx++}`;
             }
             i++;
           }
         }
       }
     }
+
+    // chỉ select bảng ghi đầu tiên trong mệnh đề thôi
+    if (!sqlWhere) {
+      sqlWhere += " WHERE ROWNUM = 1";
+    } else {
+      sqlWhere += " AND ROWNUM = 1";
+    }
+
+    // gán mệnh đề where
+    sql += sqlWhere;
 
     // bổ sung thêm mệnh đề sắp xếp order by
     // chỉnh sửa bug order
@@ -717,6 +907,7 @@ class OracleDAO {
     //console.log(sql);
     //console.log(params);
     return this.getRst(sql, params);
+
   }
   //lay 1 bang ghi dau tien cua select
   /**
@@ -725,6 +916,7 @@ class OracleDAO {
    * @param {*} params
    */
   getRst(sql, params = []) {
+
     return new Promise(async (resolve, reject) => {
       // Tạo mới một Promise thực thi câu lệnh sql
       // lấy một connection mới để thực thi, xong thì release để trả lại
@@ -767,6 +959,7 @@ class OracleDAO {
    * @param {*} selectTable
    */
   selectAll(selectTable) {
+    
     let sql = `SELECT * FROM ${selectTable.name}`;
 
     let i = 0;

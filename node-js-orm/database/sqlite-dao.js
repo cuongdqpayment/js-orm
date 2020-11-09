@@ -36,9 +36,9 @@ class SQLiteDAO {
 
     let pathDb = `${dbFilePath.substring(0, dbFilePath.lastIndexOf("/"))}`;
 
-    console.log("DB_FILE_INPUT:", dbFilePath);
-    console.log("CURRENT_DIR:", __dirname);
-    console.log("PATH_DIR:", pathDb);
+    // console.log("DB_FILE_INPUT:", dbFilePath);
+    // console.log("CURRENT_DIR:", __dirname);
+    // console.log("PATH_DIR:", pathDb);
 
     if (!fs.existsSync(pathDb)) {
       fs.mkdirSync(pathDb, true);
@@ -233,9 +233,9 @@ class SQLiteDAO {
     return this.runSql(sql, params);
   }
 
-  //update
   /**
-   *
+   * update chỉ một bảng ghi đầu tiên tìm thấy thôi
+   * phù hợp với mongodb 
    * @param {*} updateTable
    *  var updateTable={
    *                  name:'tablename',
@@ -250,7 +250,8 @@ class SQLiteDAO {
    *                  }
    */
   update(updateTable) {
-    let sql = "UPDATE " + updateTable.name + " SET ";
+
+    let sql = `UPDATE ${updateTable.name} SET `;
 
     let i = 0;
     let params = [];
@@ -277,28 +278,114 @@ class SQLiteDAO {
       }
     }
 
+    let sqlWhere = "";
     i = 0;
     for (let col of updateTable.wheres) {
       if (col.value !== undefined && col.value !== null) {
         // ver 4.0 bổ sung mệnh đề in trong where
         if (Array.isArray(col.value)) {
-          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
         } else if (typeof col.value === "object") {
           // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
           let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
           i = iOut;
-          sql += whereS;
+          sqlWhere += whereS;
           // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
-          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
         }
       } else if (col.value === null) {
-        sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
-      } else {
-        sql += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
+        sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
+      }
+      /* else {
+        sqlWhere += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
+      } */
+    }
+
+    // không cho phép update toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for UPDATE by Model");
+    }
+
+    // bổ sung mệnh đề AND ROWNUM = 1 - chỉ lấy 1 bảng ghi ra thôi theo mệnh đề where trước đó thôi nhé
+    let sqlFirstRecord = `SELECT min(rowid) as rowid from ${updateTable.name}${sqlWhere}`;
+    sqlWhere +=` AND rowid in (${sqlFirstRecord})`;
+
+    sql += sqlWhere;
+
+    return this.runSql(sql, params);
+  }
+
+
+  /**
+   * Cập nhập tất cả các bảng ghi theo mệnh đề where
+   * Yêu cầu mệnh đề where phải có, nếu không db sẽ bị out nếu update full table
+   * Nếu muốn update full table - dangers 
+   * @param {*} updateTable 
+   */
+  updateAll(updateTable) {
+    let sql = `UPDATE ${updateTable.name} SET `;
+
+    let i = 0;
+    let params = [];
+    for (let col of updateTable.cols) {
+      if (
+        col.value !== undefined &&
+        col.value !== null &&
+        typeof col.value != "object"
+      ) {
+        //neu gia tri khong phai undefined moi duoc thuc thi, và giá trị không phải là đối tượng
+        params.push(col.value);
+        if (i++ == 0) {
+          sql += col.name + "= ?";
+        } else {
+          sql += ", " + col.name + "= ?";
+        }
+      } else if (col.value === null) {
+        // mệnh đề null luôn không tăng i
+        if (i++ == 0) {
+          sql += col.name + "= null";
+        } else {
+          sql += ", " + col.name + "= null";
+        }
       }
     }
+
+    let sqlWhere = "";
+    i = 0;
+    for (let col of updateTable.wheres) {
+      if (col.value !== undefined && col.value !== null) {
+        // ver 4.0 bổ sung mệnh đề in trong where
+        if (Array.isArray(col.value)) {
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sqlWhere += whereS;
+          // console.log("--->", iOut, whereS);
+        } else {
+          params.push(col.value);
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
+        }
+      } else if (col.value === null) {
+        sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
+      }
+      /* 
+      else {
+        sqlWhere += " WHERE 1=2"; //menh de where sai thi khong cho update Bao toan du lieu
+      } 
+      */
+    }
+
+    // không cho phép update toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for UPDATE by Model");
+    }
+
+    sql += sqlWhere;
+
     return this.runSql(sql, params);
   }
 
@@ -308,30 +395,92 @@ class SQLiteDAO {
    * @param {*} id
    */
   delete(deleteTable) {
-    let sql = "DELETE FROM " + deleteTable.name;
+   
+    let sql = `DELETE FROM ${deleteTable.name}`;
+
     let i = 0;
     let params = [];
+
+    let sqlWhere = "";
     for (let col of deleteTable.wheres) {
       if (col.value != undefined && col.value != null) {
         // ver 4.0 bổ sung mệnh đề in trong where
         if (Array.isArray(col.value)) {
-          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
         } else if (typeof col.value === "object") {
           // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
           let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
           i = iOut;
-          sql += whereS;
+          sqlWhere += whereS;
           // console.log("--->", iOut, whereS);
         } else {
           params.push(col.value);
-          sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
         }
       } else if (col.value === null) {
-        sql += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
-      } else {
-        sql += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
+        sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
       }
+      /* else {
+        sqlWhere += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
+      } */
     }
+
+    // không cho phép update toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for UPDATE by Model");
+    }
+    
+    // bổ sung mệnh đề AND ROWNUM = 1 - chỉ lấy 1 bảng ghi ra thôi
+    let sqlFirstRecord = `SELECT min(rowid) as rowid from ${deleteTable.name}${sqlWhere}`;
+    sqlWhere +=` AND rowid in (${sqlFirstRecord})`;
+
+    sql += sqlWhere;
+
+    return this.runSql(sql, params);
+  }
+
+
+  /**
+   * Xóa nhiều bảng ghi
+   * @param {*} deleteTable 
+   */
+  deleteAll(deleteTable) {
+
+    let sql = `DELETE FROM ${deleteTable.name}`;
+    let i = 0;
+    let params = [];
+
+    let sqlWhere = "";
+    for (let col of deleteTable.wheres) {
+      if (col.value != undefined && col.value != null) {
+        // ver 4.0 bổ sung mệnh đề in trong where
+        if (Array.isArray(col.value)) {
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} in ('${value.join("','")}')`;
+        } else if (typeof col.value === "object") {
+          // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
+          let { iOut, whereS } = changeMongoWheres2Sql(col.name, col.value, i);
+          i = iOut;
+          sqlWhere += whereS;
+          // console.log("--->", iOut, whereS);
+        } else {
+          params.push(col.value);
+          sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name}= ?`;
+        }
+      } else if (col.value === null) {
+        sqlWhere += (i++ === 0 ? ` WHERE ` : ` AND `) + `${col.name} is null`;
+      }
+      /* else {
+        sqlWhere += " WHERE 1=2"; //dam bao khong bi xoa toan bo so lieu khi khai bao sai
+      } */
+    }
+
+    // không cho phép delete toàn bộ nếu không có mệnh đề where
+    if (!sqlWhere) {
+      return Promise.reject("NO WHERE clause for DELETES by Model");
+    }
+
+    sql += sqlWhere;
+
     return this.runSql(sql, params);
   }
 
