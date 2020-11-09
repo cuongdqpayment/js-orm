@@ -178,6 +178,6 @@ cd ../
 ## - Lệnh push lưu
 ```sh
 git add .
-git commit -am "fix version 3.0.0"
+git commit -am "fix version 3.0.1"
 git push
 ```
