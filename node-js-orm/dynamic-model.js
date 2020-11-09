@@ -1,3 +1,11 @@
+/**
+ * Lớp mô hình động hỗ trợ CRUD và cho 1 hoặc nhiều bảng ghi, trả tên csdl, cấu trúc mô hình
+ * - import danh sách - không update
+ * - import danh sách nếu lỗi thì update theo mệnh đề where
+ * - import tự update theo mệnh đề where theo key đưa vào hoặc theo các trường primarykey, isUnique, uniqueMuilti
+ *  
+ */
+
 // định nghĩa chuyển csdl
 const Model = require("./model");
 const json2Model = require("./json-2-model");
@@ -111,7 +119,7 @@ class DynamicModel extends Model {
 
   /**
    * Import một danh sách dữ liệu vào csdl, bảng ghi nào thành công thì ok, nếu không thành công thì bỏ qua và báo lỗi
-   * @param {*} jsonRows
+   * @param {*} jsonRows  [{oneRow},...]
    */
   importRows(jsonRows = [], GROUP_COUNT = 100, isDebug = false) {
     if (
@@ -130,15 +138,15 @@ class DynamicModel extends Model {
     );
   }
 
+
   /**
    * Import danh sách mới, nếu trùng (hoặc lỗi - không cần biết lỗi gì - thì thực hiện update)
    * @param {*} jsonRows  [{oneRow},...]
    * @param {*} whereKeys ["id","table_name",...] nếu trùng thì sử dụng biến này để update
-   * Phải viết thêm quá trình insert, bảng ghi lỗi, phải trả về mệnh đề where luôn nhé
    */
   importRowsUpdates(
     jsonRows = [],
-    whereKeys = [],
+    whereKeys,
     GROUP_COUNT = 100,
     isDebug = false
   ) {
@@ -165,37 +173,53 @@ class DynamicModel extends Model {
           results &&
           results.rejects &&
           Array.isArray(results.rejects) &&
+          results.rejects.length &&
           whereKeys &&
-          Array.isArray(whereKeys)
+          Array.isArray(whereKeys) &&
+          whereKeys.length
         ) {
-          updates = { count_update: 0, count_fail: 0, rejects: [] };
+          // updates = { count_update: 0, count_fail: 0, rejects: [] };
+          let arrUpdates = [];
           for (let reject of results.rejects) {
             if (reject && reject.reason && reject.reason.data) {
-              let jsonData = reject.reason.data;
-              // trích xuất jsonWhere ra để update
-              let jsonWhere = {};
-              for (let key of whereKeys) {
-                if (jsonData[key] !== undefined) {
-                  // có khóa này trong json data thì khai báo cho mệnh đề where
-                  jsonWhere[key] = jsonData[key];
-                }
-              }
-              if (Object.keys(jsonWhere).length) {
-                // có tham số mệnh đề where
-                // thực hiện update từng bảng ghi để ghi ra kết quả
-                let uExec = await this.update(jsonData, jsonWhere).catch(
-                  (error) => {
-                    // lỗi không update được
-                    updates.count_fail++;
-                    updates.rejects.push(error);
-                  }
-                );
-                if (uExec) {
-                  updates.count_update++;
-                }
-              }
+              arrUpdates.push(reject.reason.data);
+              // let jsonData = reject.reason.data;
+              // // trích xuất jsonWhere ra để update
+              // let jsonWhere = {};
+              // for (let key of whereKeys) {
+              //   if (jsonData[key] !== undefined) {
+              //     // có khóa này trong json data thì khai báo cho mệnh đề where
+              //     jsonWhere[key] = jsonData[key];
+              //   }
+              // }
+              // if (Object.keys(jsonWhere).length) {
+              //   // có tham số mệnh đề where
+              //   // thực hiện update từng bảng ghi để ghi ra kết quả
+              //   let uExec = await this.update(jsonData, jsonWhere).catch(
+              //     (error) => {
+              //       // lỗi không update được
+              //       updates.count_fail++;
+              //       updates.rejects.push(error);
+              //     }
+              //   );
+              //   if (uExec) {
+              //     updates.count_update++;
+              //   }
+              // }
+
             }
           }
+          // thực hiện update hàng loạt
+          updates = await excell2Database
+            .updateArray2Database(this
+              , arrUpdates
+              , whereKeys
+              , GROUP_COUNT
+              , isDebug
+            ).catch(err => {
+              console.log("excell2Database.updateArray2Database Error:", err);
+            })
+
         }
 
         // trả lại kết quả import như cũ, thêm kết quả update hàng loạt theo mệnh đề
@@ -204,6 +228,41 @@ class DynamicModel extends Model {
           updates,
         };
       });
+  }
+
+  /**
+   * Thực hiện update toàn bộ bảng ghi (không insert mới)
+   * @param {*} jsonRows 
+   * @param {*} whereKeys là mảng chứa các key update theo, nếu không đưa vào thì mặt định lấy các isUnique hoặc uniqueMulti làm key
+   * @param {*} GROUP_COUNT 
+   * @param {*} isDebug 
+   */
+  updateRows(jsonRows = [], whereKeys, GROUP_COUNT = 100, isDebug = false) {
+    if (
+      !jsonRows ||
+      !Array.isArray(jsonRows) ||
+      jsonRows.filter((x) => Object.keys(x).length > 0).length === 0
+    ) {
+      return Promise.reject("No data for import");
+    }
+    let arrWhereKeys = [];
+    if (whereKeys && Array.isArray(whereKeys) && whereKeys.length) {
+      arrWhereKeys = [...whereKeys];
+    } else {
+      arrWhereKeys = [
+        this.getUniques().primary_key,
+        ...this.getUniques().is_unique,
+        ...this.getUniques().unique_multi
+      ];
+    }
+
+    return excell2Database.updateArray2Database(
+      this,
+      jsonRows.filter((x) => Object.keys(x).length > 0),
+      arrWhereKeys,
+      GROUP_COUNT,
+      isDebug
+    );
   }
 
   /**

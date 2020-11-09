@@ -1,4 +1,6 @@
 
+ver 3.0.4 updateRows and excell2Database.updateArray2Database
+
 ver 3.0.3 importRowsUpdates ok
 
 ver 3.0.1 change structure for update/updateAll, delete/deleteAll, select/selectAll - One and Many

@@ -85,6 +85,8 @@ class NodeDatabase {
 
     console.log(` ***> START connect to Database ${connCfg.type}\n -----> ${connCfg.database}`);
 
+    this.dbName = `${connCfg.type}#${connCfg.database}`;
+
     this.cfg = connCfg;
     switch (this.cfg.type) {
       case "sqlite3":
@@ -202,6 +204,13 @@ class NodeDatabase {
    */
   getDbConfig() {
     return this.cfg;
+  }
+
+  /**
+   * Trả tên csdl kết nối
+   */
+  getDbName() {
+    return this.dbName;
   }
 
   /**

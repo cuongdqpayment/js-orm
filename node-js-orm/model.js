@@ -31,6 +31,9 @@ const { SQLiteDAO, OracleDAO, MongoDAO } = require("./database");
 // kiểu dữ liệu để validate
 const dataTypes = require("./data-types");
 
+/**
+ * CRUD Model in ORM so easy for you!
+ */
 class Model {
   /**
      * ex: 
@@ -59,7 +62,27 @@ class Model {
      * @param {*} jsonDefine = define of table for any database framwork or null for CRUD | định nghĩa cấu trúc ràng buộc, tạo bảng 
      */
   constructor(database, tbName, jsonDefine) {
+    // gán cấu trúc của mô hình được định nghĩa nơi đây
     this.tableStructure = jsonDefine;
+    // lọc các danh mục các trường xác định unique để phục vụ cho mệnh đề update theo unique
+    // danh mục các trường khóa chính của mô hình (primary_key, is_unique, unique_multi)
+    // this.uniqueKeys = { primary_key: "id", is_unique: ["id"], unique_multi:["id", "key"]};
+    this.uniqueKeys = { is_unique: [], unique_multi: [] };
+    for (let key in jsonDefine) {
+      let dataType = jsonDefine[key];
+      if (typeof dataType === "object") {
+        if (dataType.primaryKey) {
+          this.uniqueKeys.primary_key = key;
+        }
+        if (dataType.isUnique) {
+          this.uniqueKeys.is_unique.push(key);
+        }
+        if (dataType.uniqueKeyMulti && typeof dataType.uniqueKeyMulti === "object") {
+          this.uniqueKeys.unique_multi.splice(0, 0, ...dataType.uniqueKeyMulti.split(",").map(x => x.trim()));
+        }
+      }
+    }
+
     this.db = database;
     this.tableName = tbName;
     this.dbType = dataTypes.DataType.mapType().dbTypes[0]; // js
@@ -84,6 +107,20 @@ class Model {
       },
       2
     );
+  }
+
+  /**
+   * Trả về các tên trường unique để update
+   */
+  getUniques() {
+    return this.uniqueKeys;
+  }
+
+  /**
+   * Trả về tên csdl ghép giữa type#databasename
+   */
+  getDbName() {
+    return this.db ? this.db.getDbName() : "";
   }
 
   /**
@@ -129,64 +166,16 @@ class Model {
       let jsonDaoDataAutoIncrement = await this.checkAutoIncrement(jsonFilter);
       let jsonDaoData = this.convertTrueData(jsonDaoDataAutoIncrement);
       // kiểm tra nếu lỗi thì trả về mã lỗi và câu sql gốc
-      return this.db.insertOne(this.tableName, jsonDaoData).catch((error) => {
-        throw {
-          data: jsonDaoData,
-          error,
-        };
-      });
+      return this.db.insertOne(this.tableName, jsonDaoData)
+        .catch((error) => {
+          throw {
+            data: jsonData,
+            error,
+          };
+        });
     } catch (e) {
       return this.errorPromise(e);
     }
-  }
-
-  /**
-   *
-   * @param {*} jsonData
-   */
-  update(jsonData, jsonWhere) {
-    try {
-      let jsonFilter = this.tableStructure
-        ? this.validFilter(jsonData)
-        : jsonData;
-      return this.db.updateOne(this.tableName, jsonFilter, jsonWhere);
-    } catch (e) {
-      return this.errorPromise(e);
-    }
-  }
-
-  /**
-   * Update tất cả (mongodb phân biệt update 1 bảng ghi gặp đầu tiên thay vì update tất cả như DBMS thì không)
-   * @param {*} jsonData
-   * @param {*} jsonWhere
-   */
-  updateAll(jsonData, jsonWhere) {
-    try {
-      let jsonFilter = this.tableStructure
-        ? this.validFilter(jsonData)
-        : jsonData;
-      return this.db.updateAll(this.tableName, jsonFilter, jsonWhere);
-    } catch (e) {
-      return this.errorPromise(e);
-    }
-  }
-
-  /**
-   * Xóa bảng ghi có mệnh đề where theo json
-   * @param {*} jsonWhere
-   * @param {*} jsonOption
-   */
-  delete(jsonWhere, jsonOption) {
-    return this.db.deleteOne(this.tableName, jsonWhere, jsonOption);
-  }
-
-  /**
-   * Xóa tất cả như cũ (mongodb phân biệt xóa tất cả và xóa 1 bảng ghi nhưng DBMS thì không)
-   * @param {*} jsonWhere
-   * @param {*} jsonOption
-   */
-  deleteAll(jsonWhere, jsonOption) {
-    return this.db.deleteAll(this.tableName, jsonWhere, jsonOption);
   }
 
   /**
@@ -268,6 +257,67 @@ class Model {
           length: data.length,
         };
       });
+  }
+
+  /**
+  *
+  * @param {*} jsonData
+  */
+  update(jsonData, jsonWhere) {
+    try {
+      let jsonFilter = this.tableStructure
+        ? this.validFilter(jsonData)
+        : jsonData;
+      return this.db.updateOne(this.tableName, jsonFilter, jsonWhere)
+        .catch((error) => {
+          throw {
+            data: jsonData,
+            error,
+          };
+        });;
+    } catch (e) {
+      return this.errorPromise(e);
+    }
+  }
+
+  /**
+   * Update tất cả (mongodb phân biệt update 1 bảng ghi gặp đầu tiên thay vì update tất cả như DBMS thì không)
+   * @param {*} jsonData
+   * @param {*} jsonWhere
+   */
+  updateAll(jsonData, jsonWhere) {
+    try {
+      let jsonFilter = this.tableStructure
+        ? this.validFilter(jsonData)
+        : jsonData;
+      return this.db.updateAll(this.tableName, jsonFilter, jsonWhere)
+        .catch((error) => {
+          throw {
+            data: jsonData,
+            error,
+          };
+        });
+    } catch (e) {
+      return this.errorPromise(e);
+    }
+  }
+
+  /**
+   * Xóa bảng ghi có mệnh đề where theo json
+   * @param {*} jsonWhere
+   * @param {*} jsonOption
+   */
+  delete(jsonWhere, jsonOption) {
+    return this.db.deleteOne(this.tableName, jsonWhere, jsonOption);
+  }
+
+  /**
+   * Xóa tất cả như cũ (mongodb phân biệt xóa tất cả và xóa 1 bảng ghi nhưng DBMS thì không)
+   * @param {*} jsonWhere
+   * @param {*} jsonOption
+   */
+  deleteAll(jsonWhere, jsonOption) {
+    return this.db.deleteAll(this.tableName, jsonWhere, jsonOption);
   }
 
   /**

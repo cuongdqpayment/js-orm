@@ -131,6 +131,60 @@ const importArray2Database = (model, arrJson, GROUP_COUNT = 100, isDebug) => {
     })
 }
 
+/**
+ * thực hiện import hàng loạt theo mệnh đề update sử dụng các khóa whereKeys
+ * @param {*} model 
+ * @param {*} arrJson 
+ * @param {*} whereKeys ex: whereKeys["id","key",...]
+ * @param {*} GROUP_COUNT 
+ * @param {*} isDebug 
+ */
+const updateArray2Database = (model, arrJson, whereKeys = [], GROUP_COUNT = 100, isDebug) => {
+    if (!model || !arrJson) {
+        return Promise.reject(`Không khai báo đầy đủ các biến vào: model, arrJson hoặc không có dữ liệu để chèn`);
+    }
+    return new Promise(async (rs, rj) => {
+        let result = { table_name: model.getName(), count_update: 0, count_fail: 0, group_batch: GROUP_COUNT };
+        const rejects = [];
+        for (let i = 0; i < arrJson.length; i += GROUP_COUNT) {
+            const updateModels = arrJson.slice(i, i + GROUP_COUNT).map((row) => {
+                // Mỗi đợt GROUP_COUNT chúng ta đưa vào mảng xử lý promise
+                let jsonData = {
+                    ...row
+                };
+                let jsonWhere = {};
+                for (let key of whereKeys) {
+                    if (jsonData[key] !== undefined) {
+                        // có khóa này trong json data thì khai báo cho mệnh đề where
+                        jsonWhere[key] = jsonData[key];
+                        jsonData[key] = undefined; // không update khóa where
+                    }
+                }
+
+                return model.update(jsonData, jsonWhere);
+            })
+            // updateModels sẽ có 100 hoặc ít hơn các promise đang chờ xử lý.
+            // Promise.all sẽ đợi cho đến khi tất cả các promise 
+            // Promise.allSettled sẽ đợi cho đến khi tất cả các promise 
+            // thủ tục này yêu cầu nodejs từ 12.9 trở lên
+            //đã được giải quyết và sau đó thực hiện 100 lần tiếp theo.
+            let rslt = await Promise.allSettled(updateModels);
+            if (rslt) {
+                if (isDebug) console.log(`Kết quả chèn:`, rslt)
+                // console.log(`Kết quả chèn thành công:`, rslt.map(x => x.status === "fulfilled"))
+                // console.log(`Kết quả chèn thất bại:`, rslt.map(x => x.status === "rejected"))
+                result.count_fail += rslt.filter(x => x.status === "rejected").length;
+                result.count_update += rslt.filter(x => x.status === "fulfilled").length;
+                rejects.splice(rejects.length, 0, ...rslt.filter(x => x.status === "rejected"));
+            }
+        }
+        rs({
+            ...result,
+            rejects
+        })
+    })
+}
+
 
 /**
  * đọc file excel, liệt kê các sheet có dữ liệu và thực hiện import
@@ -185,4 +239,5 @@ module.exports = {
     , importExcel2Database
     // thực hiện chèn mảng json vào csdl thông qua mô hình đã định nghĩa trước đó
     , importArray2Database
+    , updateArray2Database
 }
