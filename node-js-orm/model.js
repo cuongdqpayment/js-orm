@@ -77,8 +77,15 @@ class Model {
         if (dataType.isUnique) {
           this.uniqueKeys.is_unique.push(key);
         }
-        if (dataType.uniqueKeyMulti && typeof dataType.uniqueKeyMulti === "string") {
-          this.uniqueKeys.unique_multi.splice(0, 0, ...dataType.uniqueKeyMulti.split(",").map(x => x.trim()));
+        if (
+          dataType.uniqueKeyMulti &&
+          typeof dataType.uniqueKeyMulti === "string"
+        ) {
+          this.uniqueKeys.unique_multi.splice(
+            0,
+            0,
+            ...dataType.uniqueKeyMulti.split(",").map((x) => x.trim())
+          );
         }
       }
     }
@@ -166,13 +173,12 @@ class Model {
       let jsonDaoDataAutoIncrement = await this.checkAutoIncrement(jsonFilter);
       let jsonDaoData = this.convertTrueData(jsonDaoDataAutoIncrement);
       // kiểm tra nếu lỗi thì trả về mã lỗi và câu sql gốc
-      return this.db.insertOne(this.tableName, jsonDaoData)
-        .catch((error) => {
-          throw {
-            data: jsonData,
-            error,
-          };
-        });
+      return this.db.insertOne(this.tableName, jsonDaoData).catch((error) => {
+        throw {
+          data: jsonData,
+          error,
+        };
+      });
     } catch (e) {
       return this.errorPromise(e);
     }
@@ -260,21 +266,22 @@ class Model {
   }
 
   /**
-  *
-  * @param {*} jsonData
-  */
+   *
+   * @param {*} jsonData
+   */
   update(jsonData, jsonWhere) {
     try {
       let jsonFilter = this.tableStructure
         ? this.validFilter(jsonData)
         : jsonData;
-      return this.db.updateOne(this.tableName, jsonFilter, jsonWhere)
+      return this.db
+        .updateOne(this.tableName, jsonFilter, jsonWhere)
         .catch((error) => {
           throw {
             data: jsonData,
             error,
           };
-        });;
+        });
     } catch (e) {
       return this.errorPromise(e);
     }
@@ -290,7 +297,8 @@ class Model {
       let jsonFilter = this.tableStructure
         ? this.validFilter(jsonData)
         : jsonData;
-      return this.db.updateAll(this.tableName, jsonFilter, jsonWhere)
+      return this.db
+        .updateAll(this.tableName, jsonFilter, jsonWhere)
         .catch((error) => {
           throw {
             data: jsonData,
@@ -333,7 +341,7 @@ class Model {
       let el = this.tableStructure[key];
       let value = jsonData[key];
       // trường hợp có định nghĩa trường tự sinh nhưng không gán giá trị
-      if (value === undefined && el.autoIncrement) {
+      if (el.autoIncrement && !value) {
         // kiểm tra csdl không hỗ trợ trường tự sinh tham số được thiết lập ở cấu hình
         // thì tự tạo giá trị ở đây theo seq (hoặc truy vấn csdl và lấy giá trị lớn nhất + 1)
         // trả về là max hoặc undefined

@@ -1,4 +1,6 @@
 
+ver 3.1.0 fix datatype for mongodb convert data with null
+
 ver 3.0.9 fix table to jsonText in excel
 
 ver 3.0.7 fix get this.uniqueKeys for multi

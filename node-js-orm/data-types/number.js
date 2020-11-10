@@ -17,7 +17,7 @@ class NUMBER extends DataType {
      * @param {*} dbType 
      */
     getTrueData(value, dbType) {
-        return parseFloat(value)
+        return isNaN(parseFloat(value)) ? undefined : parseFloat(value) 
     }
 }
 module.exports = new NUMBER()

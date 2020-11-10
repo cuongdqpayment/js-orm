@@ -17,7 +17,7 @@ class INTEGER extends DataType {
      * @param {*} dbType 
      */
     getTrueData(value, dbType) {
-        return parseInt(value)
+        return isNaN(parseInt(value)) ? undefined : parseInt(value) 
     }
 }
 module.exports = new INTEGER()

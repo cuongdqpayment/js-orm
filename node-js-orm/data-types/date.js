@@ -22,6 +22,11 @@ class DATE extends DataType {
     * @param {*} dbType 
     */
     getTrueData(value, dbType) {
+        
+        if (!value) {
+            return undefined;
+        }
+
         let customeDate = new Date(value);
         if (dbType === DataType.mapType().dbTypes[0]) return customeDate
         let yyyy_mm_dd = ("" + customeDate.getFullYear()).padStart(4, 0) + "-" + ("" + (customeDate.getMonth() + 1)).padStart(2, 0) + "-" + ("" + customeDate.getDate()).padStart(2, 0)
