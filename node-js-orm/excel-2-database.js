@@ -6,8 +6,10 @@
 
 // nhúng mô hình 
 const xlsxtojson1st = require("xlsx-to-json-lc");
+
 // nhúng mô hình giao tiếp dữ liệu để xử lý tạo bảng, chèn dữ liệu từ excel
-const Model = require("./model");
+const DynamicModel = require("./dynamic-model");
+
 const { array2JsonTexts, jsonText2Model } = require("./json-2-model");
 
 // sử dụng Promise.allSettled để thay cho Promise.all để bỏ qua các lỗi và cho thực thi tiếp
@@ -62,7 +64,7 @@ const createExcel2Models = (db, excelFilename, sheetName = SHEET_CFG, headerCfg 
                 let textModel = jsonTextModels[tablename];
                 // chuyển đổi kiểu mô hình DataTypes
                 let jsonTableModel = jsonText2Model(textModel);
-                result.table_models.push(new Model(db, tablename, jsonTableModel))
+                result.table_models.push(new DynamicModel(db, tablename, jsonTableModel))
             }
             return result.table_models
         })

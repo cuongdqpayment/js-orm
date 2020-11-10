@@ -3,7 +3,7 @@
  * - import danh sách - không update
  * - import danh sách nếu lỗi thì update theo mệnh đề where
  * - import tự update theo mệnh đề where theo key đưa vào hoặc theo các trường primarykey, isUnique, uniqueMuilti
- *  
+ *
  */
 
 // định nghĩa chuyển csdl
@@ -138,7 +138,6 @@ class DynamicModel extends Model {
     );
   }
 
-
   /**
    * Import danh sách mới, nếu trùng (hoặc lỗi - không cần biết lỗi gì - thì thực hiện update)
    * @param {*} jsonRows  [{oneRow},...]
@@ -173,53 +172,39 @@ class DynamicModel extends Model {
           results &&
           results.rejects &&
           Array.isArray(results.rejects) &&
-          results.rejects.length &&
-          whereKeys &&
-          Array.isArray(whereKeys) &&
-          whereKeys.length
+          results.rejects.length
         ) {
           // updates = { count_update: 0, count_fail: 0, rejects: [] };
           let arrUpdates = [];
           for (let reject of results.rejects) {
             if (reject && reject.reason && reject.reason.data) {
               arrUpdates.push(reject.reason.data);
-              // let jsonData = reject.reason.data;
-              // // trích xuất jsonWhere ra để update
-              // let jsonWhere = {};
-              // for (let key of whereKeys) {
-              //   if (jsonData[key] !== undefined) {
-              //     // có khóa này trong json data thì khai báo cho mệnh đề where
-              //     jsonWhere[key] = jsonData[key];
-              //   }
-              // }
-              // if (Object.keys(jsonWhere).length) {
-              //   // có tham số mệnh đề where
-              //   // thực hiện update từng bảng ghi để ghi ra kết quả
-              //   let uExec = await this.update(jsonData, jsonWhere).catch(
-              //     (error) => {
-              //       // lỗi không update được
-              //       updates.count_fail++;
-              //       updates.rejects.push(error);
-              //     }
-              //   );
-              //   if (uExec) {
-              //     updates.count_update++;
-              //   }
-              // }
-
             }
           }
-          // thực hiện update hàng loạt
-          updates = await excell2Database
-            .updateArray2Database(this
-              , arrUpdates
-              , whereKeys
-              , GROUP_COUNT
-              , isDebug
-            ).catch(err => {
-              console.log("excell2Database.updateArray2Database Error:", err);
-            })
 
+          let arrWhereKeys = [];
+          if (whereKeys && Array.isArray(whereKeys) && whereKeys.length) {
+            arrWhereKeys = [...whereKeys];
+          } else {
+            arrWhereKeys = [
+              this.getUniques().primary_key,
+              ...this.getUniques().is_unique,
+              ...this.getUniques().unique_multi,
+            ];
+          }
+
+          // thực hiện update hàng loạt theo mệnh đề where hoặc sử dụng khóa chính, unique để update
+          updates = await excell2Database
+            .updateArray2Database(
+              this,
+              arrUpdates,
+              arrWhereKeys,
+              GROUP_COUNT,
+              isDebug
+            )
+            .catch((err) => {
+              console.log("excell2Database.updateArray2Database Error:", err);
+            });
         }
 
         // trả lại kết quả import như cũ, thêm kết quả update hàng loạt theo mệnh đề
@@ -232,10 +217,10 @@ class DynamicModel extends Model {
 
   /**
    * Thực hiện update toàn bộ bảng ghi (không insert mới)
-   * @param {*} jsonRows 
+   * @param {*} jsonRows
    * @param {*} whereKeys là mảng chứa các key update theo, nếu không đưa vào thì mặt định lấy các isUnique hoặc uniqueMulti làm key
-   * @param {*} GROUP_COUNT 
-   * @param {*} isDebug 
+   * @param {*} GROUP_COUNT
+   * @param {*} isDebug
    */
   updateRows(jsonRows = [], whereKeys, GROUP_COUNT = 100, isDebug = false) {
     if (
@@ -252,7 +237,7 @@ class DynamicModel extends Model {
       arrWhereKeys = [
         this.getUniques().primary_key,
         ...this.getUniques().is_unique,
-        ...this.getUniques().unique_multi
+        ...this.getUniques().unique_multi,
       ];
     }
 

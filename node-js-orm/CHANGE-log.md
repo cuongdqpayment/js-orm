@@ -1,4 +1,6 @@
 
+ver 3.0.5 update where by unique field and DynamicModel in excel2Database
+
 ver 3.0.4 updateRows and excell2Database.updateArray2Database
 
 ver 3.0.3 importRowsUpdates ok
