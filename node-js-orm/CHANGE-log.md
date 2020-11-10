@@ -1,4 +1,6 @@
 
+ver 3.0.9 fix table to jsonText in excel
+
 ver 3.0.7 fix get this.uniqueKeys for multi
 
 ver 3.0.6 fix circle for Dynamic-Model.js and excel2Database

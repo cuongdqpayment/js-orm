@@ -156,57 +156,55 @@ class DynamicModel extends Model {
     }
 
     return this.importArray2Database(
-        jsonRows.filter((x) => Object.keys(x).length > 0),
-        GROUP_COUNT,
-        isDebug
-      )
-      .then(async (results) => {
-        // đọc kết quả lấy trường rejects
-        let updates;
+      jsonRows.filter((x) => Object.keys(x).length > 0),
+      GROUP_COUNT,
+      isDebug
+    ).then(async (results) => {
+      // đọc kết quả lấy trường rejects
+      let updates;
 
-        if (
-          results &&
-          results.rejects &&
-          Array.isArray(results.rejects) &&
-          results.rejects.length
-        ) {
-          // updates = { count_update: 0, count_fail: 0, rejects: [] };
-          let arrUpdates = [];
-          for (let reject of results.rejects) {
-            if (reject && reject.reason && reject.reason.data) {
-              arrUpdates.push(reject.reason.data);
-            }
+      if (
+        results &&
+        results.rejects &&
+        Array.isArray(results.rejects) &&
+        results.rejects.length
+      ) {
+        // updates = { count_update: 0, count_fail: 0, rejects: [] };
+        let arrUpdates = [];
+        for (let reject of results.rejects) {
+          if (reject && reject.reason && reject.reason.data) {
+            arrUpdates.push(reject.reason.data);
           }
-
-          let arrWhereKeys = [];
-          if (whereKeys && Array.isArray(whereKeys) && whereKeys.length) {
-            arrWhereKeys = [...whereKeys];
-          } else {
-            arrWhereKeys = [
-              this.getUniques().primary_key,
-              ...this.getUniques().is_unique,
-              ...this.getUniques().unique_multi,
-            ];
-          }
-
-          // thực hiện update hàng loạt theo mệnh đề where hoặc sử dụng khóa chính, unique để update
-          updates = await this.updateArray2Database(
-              arrUpdates,
-              arrWhereKeys,
-              GROUP_COUNT,
-              isDebug
-            )
-            .catch((err) => {
-              console.log("updateArray2Database Error:", err);
-            });
         }
 
-        // trả lại kết quả import như cũ, thêm kết quả update hàng loạt theo mệnh đề
-        return {
-          ...results,
-          updates,
-        };
-      });
+        let arrWhereKeys = [];
+        if (whereKeys && Array.isArray(whereKeys) && whereKeys.length) {
+          arrWhereKeys = [...whereKeys];
+        } else {
+          arrWhereKeys = [
+            this.getUniques().primary_key,
+            ...this.getUniques().is_unique,
+            ...this.getUniques().unique_multi,
+          ];
+        }
+
+        // thực hiện update hàng loạt theo mệnh đề where hoặc sử dụng khóa chính, unique để update
+        updates = await this.updateArray2Database(
+          arrUpdates,
+          arrWhereKeys,
+          GROUP_COUNT,
+          isDebug
+        ).catch((err) => {
+          console.log("updateArray2Database Error:", err);
+        });
+      }
+
+      // trả lại kết quả import như cũ, thêm kết quả update hàng loạt theo mệnh đề
+      return {
+        ...results,
+        updates,
+      };
+    });
   }
 
   /**
@@ -228,11 +226,14 @@ class DynamicModel extends Model {
     if (whereKeys && Array.isArray(whereKeys) && whereKeys.length) {
       arrWhereKeys = [...whereKeys];
     } else {
-      arrWhereKeys = [
-        this.getUniques().primary_key,
-        ...this.getUniques().is_unique,
-        ...this.getUniques().unique_multi,
-      ];
+      if (this.getUniques().primary_key){
+        arrWhereKeys.push(this.getUniques().primary_key);
+      }
+        arrWhereKeys = [
+          arrWhereKeys,
+          ...this.getUniques().is_unique,
+          ...this.getUniques().unique_multi,
+        ];
     }
 
     return this.updateArray2Database(
@@ -279,9 +280,9 @@ class DynamicModel extends Model {
 
   /**
    * Một mô hình đã định nghĩa, một mảng dữ liệu đầu vào cần đưa vào csdl
-   * @param {*} arrJson 
-   * @param {*} GROUP_COUNT 
-   * @param {*} isDebug 
+   * @param {*} arrJson
+   * @param {*} GROUP_COUNT
+   * @param {*} isDebug
    */
   importArray2Database(arrJson, GROUP_COUNT = 100, isDebug) {
     if (!arrJson) {
@@ -334,10 +335,10 @@ class DynamicModel extends Model {
 
   /**
    * thực hiện import hàng loạt theo mệnh đề update sử dụng các khóa whereKeys
-   * @param {*} arrJson 
-   * @param {*} whereKeys 
-   * @param {*} GROUP_COUNT 
-   * @param {*} isDebug 
+   * @param {*} arrJson
+   * @param {*} whereKeys
+   * @param {*} GROUP_COUNT
+   * @param {*} isDebug
    */
   updateArray2Database(arrJson, whereKeys = [], GROUP_COUNT = 100, isDebug) {
     if (!arrJson) {

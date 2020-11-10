@@ -63,8 +63,8 @@ const createExcel2Models = (db, excelFilename, sheetName = SHEET_CFG, headerCfg 
                 // lấy lại cấu hình mô hình từng bảng
                 let textModel = jsonTextModels[tablename];
                 // chuyển đổi kiểu mô hình DataTypes
-                let jsonTableModel = jsonText2Model(textModel);
-                result.table_models.push(new DynamicModel(db, tablename, jsonTableModel))
+                // let jsonTableModel = jsonText2Model(textModel);
+                result.table_models.push(new DynamicModel(db, tablename, textModel))
             }
             return result.table_models
         })
