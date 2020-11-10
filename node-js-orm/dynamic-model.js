@@ -9,7 +9,6 @@
 // định nghĩa chuyển csdl
 const Model = require("./model");
 const json2Model = require("./json-2-model");
-const excell2Database = require("./excel-2-database");
 
 // Định nghĩa khai báo một mô hình với csdl bằng mở rộng lớp mô hình từ thư viện và gọi lại thư viện
 class DynamicModel extends Model {
@@ -130,8 +129,7 @@ class DynamicModel extends Model {
       return Promise.reject("No data for import");
     }
 
-    return excell2Database.importArray2Database(
-      this,
+    return this.importArray2Database(
       jsonRows.filter((x) => Object.keys(x).length > 0),
       GROUP_COUNT,
       isDebug
@@ -157,9 +155,7 @@ class DynamicModel extends Model {
       return Promise.reject("No data for import");
     }
 
-    return excell2Database
-      .importArray2Database(
-        this,
+    return this.importArray2Database(
         jsonRows.filter((x) => Object.keys(x).length > 0),
         GROUP_COUNT,
         isDebug
@@ -194,16 +190,14 @@ class DynamicModel extends Model {
           }
 
           // thực hiện update hàng loạt theo mệnh đề where hoặc sử dụng khóa chính, unique để update
-          updates = await excell2Database
-            .updateArray2Database(
-              this,
+          updates = await this.updateArray2Database(
               arrUpdates,
               arrWhereKeys,
               GROUP_COUNT,
               isDebug
             )
             .catch((err) => {
-              console.log("excell2Database.updateArray2Database Error:", err);
+              console.log("updateArray2Database Error:", err);
             });
         }
 
@@ -241,8 +235,7 @@ class DynamicModel extends Model {
       ];
     }
 
-    return excell2Database.updateArray2Database(
-      this,
+    return this.updateArray2Database(
       jsonRows.filter((x) => Object.keys(x).length > 0),
       arrWhereKeys,
       GROUP_COUNT,
@@ -282,6 +275,129 @@ class DynamicModel extends Model {
    */
   deleteAll(jsonWhere) {
     return this.deleteAll(jsonWhere);
+  }
+
+  /**
+   * Một mô hình đã định nghĩa, một mảng dữ liệu đầu vào cần đưa vào csdl
+   * @param {*} arrJson 
+   * @param {*} GROUP_COUNT 
+   * @param {*} isDebug 
+   */
+  importArray2Database(arrJson, GROUP_COUNT = 100, isDebug) {
+    if (!arrJson) {
+      return Promise.reject(
+        `Không khai báo đầy đủ các biến vào: arrJson hoặc không có dữ liệu để chèn`
+      );
+    }
+    return new Promise(async (rs, rj) => {
+      let result = {
+        table_name: this.getName(),
+        count_insert: 0,
+        count_fail: 0,
+        group_batch: GROUP_COUNT,
+      };
+      const rejects = [];
+      for (let i = 0; i < arrJson.length; i += GROUP_COUNT) {
+        const insertModels = arrJson.slice(i, i + GROUP_COUNT).map((row) => {
+          // Mỗi đợt GROUP_COUNT chúng ta đưa vào mảng xử lý promise
+          return this.create(row);
+        });
+        // insertModels sẽ có 100 hoặc ít hơn các promise đang chờ xử lý.
+        // Promise.all sẽ đợi cho đến khi tất cả các promise
+        // Promise.allSettled sẽ đợi cho đến khi tất cả các promise
+        // thủ tục này yêu cầu nodejs từ 12.9 trở lên
+        //đã được giải quyết và sau đó thực hiện 100 lần tiếp theo.
+        let rslt = await Promise.allSettled(insertModels);
+        if (rslt) {
+          if (isDebug) console.log(`Kết quả chèn:`, rslt);
+          // console.log(`Kết quả chèn thành công:`, rslt.map(x => x.status === "fulfilled"))
+          // console.log(`Kết quả chèn thất bại:`, rslt.map(x => x.status === "rejected"))
+          result.count_fail += rslt.filter(
+            (x) => x.status === "rejected"
+          ).length;
+          result.count_insert += rslt.filter(
+            (x) => x.status === "fulfilled"
+          ).length;
+          rejects.splice(
+            rejects.length,
+            0,
+            ...rslt.filter((x) => x.status === "rejected")
+          );
+        }
+      }
+      rs({
+        ...result,
+        rejects,
+      });
+    });
+  }
+
+  /**
+   * thực hiện import hàng loạt theo mệnh đề update sử dụng các khóa whereKeys
+   * @param {*} arrJson 
+   * @param {*} whereKeys 
+   * @param {*} GROUP_COUNT 
+   * @param {*} isDebug 
+   */
+  updateArray2Database(arrJson, whereKeys = [], GROUP_COUNT = 100, isDebug) {
+    if (!arrJson) {
+      return Promise.reject(
+        `Không khai báo đầy đủ các biến vào arrJson hoặc không có dữ liệu để chèn`
+      );
+    }
+    return new Promise(async (rs, rj) => {
+      let result = {
+        table_name: this.getName(),
+        count_update: 0,
+        count_fail: 0,
+        group_batch: GROUP_COUNT,
+      };
+      const rejects = [];
+      for (let i = 0; i < arrJson.length; i += GROUP_COUNT) {
+        const updateModels = arrJson.slice(i, i + GROUP_COUNT).map((row) => {
+          // Mỗi đợt GROUP_COUNT chúng ta đưa vào mảng xử lý promise
+          let jsonData = {
+            ...row,
+          };
+          let jsonWhere = {};
+          for (let key of whereKeys) {
+            if (jsonData[key] !== undefined) {
+              // có khóa này trong json data thì khai báo cho mệnh đề where
+              jsonWhere[key] = jsonData[key];
+              jsonData[key] = undefined; // không update khóa where
+            }
+          }
+
+          return this.update(jsonData, jsonWhere);
+        });
+        // updateModels sẽ có 100 hoặc ít hơn các promise đang chờ xử lý.
+        // Promise.all sẽ đợi cho đến khi tất cả các promise
+        // Promise.allSettled sẽ đợi cho đến khi tất cả các promise
+        // thủ tục này yêu cầu nodejs từ 12.9 trở lên
+        //đã được giải quyết và sau đó thực hiện 100 lần tiếp theo.
+        let rslt = await Promise.allSettled(updateModels);
+        if (rslt) {
+          if (isDebug) console.log(`Kết quả chèn:`, rslt);
+          // console.log(`Kết quả chèn thành công:`, rslt.map(x => x.status === "fulfilled"))
+          // console.log(`Kết quả chèn thất bại:`, rslt.map(x => x.status === "rejected"))
+          result.count_fail += rslt.filter(
+            (x) => x.status === "rejected"
+          ).length;
+          result.count_update += rslt.filter(
+            (x) => x.status === "fulfilled"
+          ).length;
+          rejects.splice(
+            rejects.length,
+            0,
+            ...rslt.filter((x) => x.status === "rejected")
+          );
+        }
+      }
+      rs({
+        ...result,
+        rejects,
+      });
+    });
   }
 
   // ... Bạn có thể chèn vào các phương thức, hàm riêng để thao tác với cơ sở dữ liệu, để trả kết quả cho người dùng

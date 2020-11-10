@@ -77,7 +77,7 @@ class Model {
         if (dataType.isUnique) {
           this.uniqueKeys.is_unique.push(key);
         }
-        if (dataType.uniqueKeyMulti && typeof dataType.uniqueKeyMulti === "object") {
+        if (dataType.uniqueKeyMulti && typeof dataType.uniqueKeyMulti === "string") {
           this.uniqueKeys.unique_multi.splice(0, 0, ...dataType.uniqueKeyMulti.split(",").map(x => x.trim()));
         }
       }

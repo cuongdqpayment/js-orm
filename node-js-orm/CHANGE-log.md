@@ -1,4 +1,8 @@
 
+ver 3.0.7 fix get this.uniqueKeys for multi
+
+ver 3.0.6 fix circle for Dynamic-Model.js and excel2Database
+
 ver 3.0.5 update where by unique field and DynamicModel in excel2Database
 
 ver 3.0.4 updateRows and excell2Database.updateArray2Database
