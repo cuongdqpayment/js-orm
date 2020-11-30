@@ -1,4 +1,6 @@
 
+ver 3.1.1 fix OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY oracle 12c
+
 ver 3.1.0 fix datatype for mongodb convert data with null
 
 ver 3.0.9 fix table to jsonText in excel

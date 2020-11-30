@@ -1024,10 +1024,10 @@ class OracleDAO {
       // console.log("***>", selectTable.orderbys, order_by);
     }
 
-    // bổ sung mệnh đề phân trang, chỉ cho oracle 12 trở lên
+    // bổ sung mệnh đề phân trang, chỉ cho oracle 12 trở lên đảo lại mệnh đề nhé
     if (selectTable.limitOffset) {
-      sql += (selectTable.limitOffset.limit ? ` FETCH NEXT ${selectTable.limitOffset.limit} ROWS ONLY` : ``);
       sql += (selectTable.limitOffset.offset ? ` OFFSET ${selectTable.limitOffset.offset} ROWS` : ``);
+      sql += (selectTable.limitOffset.limit ? ` FETCH NEXT ${selectTable.limitOffset.limit} ROWS ONLY` : ``);
     }
 
     return this.getRsts(sql, params);
