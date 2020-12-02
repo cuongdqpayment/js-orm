@@ -310,7 +310,8 @@ class SQLiteDAO {
 
     // bổ sung mệnh đề AND ROWNUM = 1 - chỉ lấy 1 bảng ghi ra thôi theo mệnh đề where trước đó thôi nhé
     let sqlFirstRecord = `SELECT min(rowid) as rowid from ${updateTable.name}${sqlWhere}`;
-    sqlWhere +=` AND rowid in (${sqlFirstRecord})`;
+    // mệnh đề rowid chỉ dùng được trên ứng dụng, chưa dùng được ở đây
+    // sqlWhere +=` AND rowid in (${sqlFirstRecord})`;
 
     sql += sqlWhere;
 
@@ -432,7 +433,8 @@ class SQLiteDAO {
     
     // bổ sung mệnh đề AND ROWNUM = 1 - chỉ lấy 1 bảng ghi ra thôi
     let sqlFirstRecord = `SELECT min(rowid) as rowid from ${deleteTable.name}${sqlWhere}`;
-    sqlWhere +=` AND rowid in (${sqlFirstRecord})`;
+    // chưa dùng được ở đây
+    // sqlWhere +=` AND rowid in (${sqlFirstRecord})`;
 
     sql += sqlWhere;
 
