@@ -1,3 +1,5 @@
+ver 3.1.3 fix where for update, select in database
+
 ver 3.1.2 fix update and delete in SQLITE3 with rowid 
 
 ver 3.1.1 fix OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY oracle 12c

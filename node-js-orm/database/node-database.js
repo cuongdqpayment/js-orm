@@ -1,11 +1,11 @@
 /**
  * 4.6 bổ sung hàm đợi kết nối csdl thành công
  * waitingConnected()
- * 
+ *
  *  4.5 ngày 10/10/2020
  * Bổ sung các mệnh đề $like, $null cho mongodb fix lỗi
  * Chuyển đổi dữ liệu string sang integer và float trước khi đưa vào mongo
- * 
+ *
  * Giao tiếp csdl tự động, sử dụng chung các mệnh đề insertOne, updateWhere, selectOne, selectAll, deleteOne
  * Giao tiếp các phương thức để: Tạo bảng - tương đương một model cho phép:
  * - tìm bảng ghi (s) = selectOne / selectAll,
@@ -82,8 +82,9 @@ class NodeDatabase {
   auto_increment_support: false,
    */
   constructor(connCfg) {
-
-    console.log(` ***> START connect to Database ${connCfg.type}\n -----> ${connCfg.database}`);
+    console.log(
+      ` ***> START connect to Database ${connCfg.type}\n -----> ${connCfg.database}`
+    );
 
     this.dbName = `${connCfg.type}#${connCfg.database}`;
 
@@ -95,54 +96,65 @@ class NodeDatabase {
       case "oracle":
         let connectString = `(DESCRIPTION =
                                             (ADDRESS_LIST =
-                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${this.cfg.host || "localhost"
-          })(PORT = ${this.cfg.port || 1521
-          }))
+                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${
+                                                  this.cfg.host || "localhost"
+                                                })(PORT = ${
+          this.cfg.port || 1521
+        }))
                                             )
                                             (CONNECT_DATA =
                                                 (SERVER = DEDICATED)
-                                                (SERVICE_NAME = ${this.cfg.database
-          })
+                                                (SERVICE_NAME = ${
+                                                  this.cfg.database
+                                                })
                                             )
                                     )`;
         if (this.cfg.hosts && this.cfg.hosts.length > 1) {
           let hostString = "";
           for (let h of this.cfg.hosts)
             if (h)
-              hostString += `(ADDRESS=(PROTOCOL=TCP)(HOST=${h.host})(PORT=${h.port || 1521
-                }))`;
+              hostString += `(ADDRESS=(PROTOCOL=TCP)(HOST=${h.host})(PORT=${
+                h.port || 1521
+              }))`;
           connectString = `(DESCRIPTION=(LOAD_BALANCE=on)
                                         (ADDRESS_LIST= ${hostString})
                                         (CONNECT_DATA=(SERVICE_NAME=${this.cfg.database})))`;
         } else if (this.cfg.hosts && this.cfg.hosts.length === 1) {
           connectString = `(DESCRIPTION =
                                             (ADDRESS_LIST =
-                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${this.cfg.hosts[0].host
-            })(PORT = ${this.cfg.hosts[0].port || 1521
-            }))
+                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${
+                                                  this.cfg.hosts[0].host
+                                                })(PORT = ${
+            this.cfg.hosts[0].port || 1521
+          }))
                                             )
                                             (CONNECT_DATA =
                                                 (SERVER = DEDICATED)
-                                                (SERVICE_NAME = ${this.cfg.database
-            })
+                                                (SERVICE_NAME = ${
+                                                  this.cfg.database
+                                                })
                                             )
                                     )`;
         }
-        this.db = new OracleDAO({
-          poolAlias:
-            (this.cfg.pool ? this.cfg.pool.name : "") || "Node-Orm-Pool",
-          user: this.cfg.username,
-          password: this.cfg.password,
-          connectString,
-          poolMax: (this.cfg.pool ? this.cfg.pool.max : 0) || 2, //so luong pool max
-          poolMin: (this.cfg.pool ? this.cfg.pool.min : 0) || 2, //so luong pool min
-          poolIncrement: (this.cfg.pool ? this.cfg.pool.increment : 0) || 0, //so luong pool tang len neu co
-          poolTimeout: (this.cfg.pool ? this.cfg.pool.timeout : 0) || 4, //thoi gian pool timeout
-        }, connCfg.isDebug);
+        this.db = new OracleDAO(
+          {
+            poolAlias:
+              (this.cfg.pool ? this.cfg.pool.name : "") || "Node-Orm-Pool",
+            user: this.cfg.username,
+            password: this.cfg.password,
+            connectString,
+            poolMax: (this.cfg.pool ? this.cfg.pool.max : 0) || 2, //so luong pool max
+            poolMin: (this.cfg.pool ? this.cfg.pool.min : 0) || 2, //so luong pool min
+            poolIncrement: (this.cfg.pool ? this.cfg.pool.increment : 0) || 0, //so luong pool tang len neu co
+            poolTimeout: (this.cfg.pool ? this.cfg.pool.timeout : 0) || 4, //thoi gian pool timeout
+          },
+          connCfg.isDebug
+        );
         break;
       case "mongodb":
-        let hostString = `${this.cfg.host || "localhost"}:${this.cfg.port || 27017
-          }`;
+        let hostString = `${this.cfg.host || "localhost"}:${
+          this.cfg.port || 27017
+        }`;
         if (this.cfg.hosts) {
           hostString = "";
           for (let ht of this.cfg.hosts) {
@@ -180,14 +192,15 @@ class NodeDatabase {
   waitingConnected() {
     if (this.db) {
       // đợi 1 phút để kết nối csdl, nếu csdl kết nối trước thì trả về ngay
-      return waiting(60000, { hasData: () => this.db.isConnected() })
-        .then(async (timeoutMsg) => {
+      return waiting(60000, { hasData: () => this.db.isConnected() }).then(
+        async (timeoutMsg) => {
           if (!timeoutMsg) {
             return true;
           } else {
             throw timeoutMsg;
           }
-        })
+        }
+      );
     }
     return Promise.reject("No datatbase init");
   }
@@ -223,16 +236,21 @@ class NodeDatabase {
     if (this.db instanceof MongoDAO) {
       return new Promise((rs) => {
         let colMongo = column; // === "id" ? "_id" : column;
-        this.db.getLastRecord(tableName, {}, Object.defineProperty({}, colMongo, {
-          value: 1, writable: true,
-          enumerable: true,
-          configurable: true,
-        }), colMongo)
+        this.db
+          .getLastRecord(
+            tableName,
+            {},
+            Object.defineProperty({}, colMongo, {
+              value: 1,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            }),
+            colMongo
+          )
           .then((rst) => {
-            if (rst && rst[colMongo])
-              rs(rst[colMongo])
-            else
-              rs(0)
+            if (rst && rst[colMongo]) rs(rst[colMongo]);
+            else rs(0);
           })
           .catch((err) => rs());
       });
@@ -255,7 +273,8 @@ class NodeDatabase {
     } else if (this.db !== null) {
       // console.log("Tạo bảng ??? ", this.convertModelTableToJson(tableName, jsonStructure));
       return this.db.createTable(
-        this.convertModelTableToJson(tableName, jsonStructure), jsonStructure
+        this.convertModelTableToJson(tableName, jsonStructure),
+        jsonStructure
       );
     } else return this.errorPromise();
   }
@@ -264,8 +283,8 @@ class NodeDatabase {
 
   /**
    * chèn một bảng ghi
-   * 
-   * @param {*} tableName 
+   *
+   * @param {*} tableName
    * @param {*} jsonData = chứa cấu trúc theo bảng, key = tên trường, value = giá trị của trường đó
    */
   insertOne(tableName, jsonData = {}) {
@@ -280,11 +299,21 @@ class NodeDatabase {
    * Update chỉ 1 bảng ghi
    * Vì lý do bảo mật csdl - tránh việc quên truyền where làm update toàn bộ dữ liệu đã lưu
    * sẽ không biết chính xác bảng ghi nào được update
-   * @param {*} tableName 
+   * @param {*} tableName
    * @param {*} jsonData = chứa cấu trúc theo bảng, key = tên trường, value = giá trị của trường đó
    * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    */
   updateOne(tableName, jsonData = {}, jsonWhere = {}) {
+    // yêu cầu phải có mệnh đề where trước khi update 1 bảng ghi này, nếu không sẽ hỏng dữ liệu
+    if (
+      !jsonWhere ||
+      typeof jsonWhere !== "object" ||
+      !Object.keys(jsonWhere).length
+    ) {
+      Promise.reject(
+        "YOU WAS MISSED WHERE CLAUSE such as jsonWhere = {fieldName:fieldValue}"
+      );
+    }
     if (this.db instanceof MongoDAO) {
       // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
       // tuy nhiên phù hợp với csdl sql khác thì nó có update tất cả bảng ghi thỏa điều kiện
@@ -296,19 +325,22 @@ class NodeDatabase {
     } else return this.errorPromise();
   }
 
-
   /**
    * Update toàn bộ các bảng ghi
    * Vì lý do bảo mật csdl - tránh việc quên truyền where làm update toàn bộ dữ liệu đã lưu
-   * @param {*} tableName 
-   * @param {*} jsonData 
-   * @param {*} jsonWhere 
+   * @param {*} tableName
+   * @param {*} jsonData
+   * @param {*} jsonWhere
    */
   updateAll(tableName, jsonData = {}, jsonWhere = {}) {
     if (this.db instanceof MongoDAO) {
       // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
       // tuy nhiên phù hợp với csdl sql khác thì nó có update tất cả bảng ghi thỏa điều kiện
-      return this.db.updateAll(tableName, modelWhere2Mongo(jsonWhere), jsonData);
+      return this.db.updateAll(
+        tableName,
+        modelWhere2Mongo(jsonWhere),
+        jsonData
+      );
     } else if (this.db !== null) {
       return this.db.updateAll(
         this.convertDaoFromMongo(tableName, jsonWhere, jsonData)
@@ -319,11 +351,21 @@ class NodeDatabase {
   /**
    * Xóa 1 bảng ghi
    * Vì lý do bảo mật csdl - tránh việc quên truyền where làm xóa toàn bộ dữ liệu đã lưu
-   * @param {*} tableName 
+   * @param {*} tableName
    * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    * @param {*} jsonOption = chỉ dùng cho mongo db (tra tham số options của mongo để dùng)
    */
   deleteOne(tableName, jsonWhere = {}, jsonOption = {}) {
+    // yêu cầu phải có mệnh đề where trước khi update 1 bảng ghi này, nếu không sẽ hỏng dữ liệu
+    if (
+      !jsonWhere ||
+      typeof jsonWhere !== "object" ||
+      !Object.keys(jsonWhere).length
+    ) {
+      Promise.reject(
+        "YOU WAS MISSED WHERE CLAUSE such as jsonWhere = {fieldName:fieldValue}"
+      );
+    }
     if (this.db instanceof MongoDAO) {
       // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
       return this.db.delete(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
@@ -336,14 +378,18 @@ class NodeDatabase {
   /**
    * Xóa tất cả các bảng ghi yêu cầu phải có mệnh đề where
    * Vì lý do bảo mật csdl - tránh việc quên truyền where làm xóa toàn bộ dữ liệu đã lưu
-   * @param {*} tableName 
-   * @param {*} jsonWhere 
-   * @param {*} jsonOption 
+   * @param {*} tableName
+   * @param {*} jsonWhere
+   * @param {*} jsonOption
    */
   deleteAll(tableName, jsonWhere = {}, jsonOption = {}) {
     if (this.db instanceof MongoDAO) {
       // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
-      return this.db.deleteALL(tableName, modelWhere2Mongo(jsonWhere), jsonOption);
+      return this.db.deleteALL(
+        tableName,
+        modelWhere2Mongo(jsonWhere),
+        jsonOption
+      );
     } else if (this.db !== null) {
       // với dữ liệu sql thì sử dụng mệnh đề where đúng không xóa 1 bảng ghi
       return this.db.deleteALL(this.convertDaoFromMongo(tableName, jsonWhere));
@@ -352,15 +398,23 @@ class NodeDatabase {
 
   /**
    * truy vấn lấy 1 bảng ghi
-   * 
-   * @param {*} tableName 
+   *
+   * @param {*} tableName
    * @param {*} jsonWhere = {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    * @param {*} jsonFields = {field_name_i:1 | 0,...} = liệt kê các trường cần lấy
    * @param {*} jsonSort   = {field_name: 1 | -1} = sắp xếp theo từ thấp đến cao =1 hoặc từ cao xuống thấp =-1
    */
   selectOne(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
+    if (!jsonWhere || typeof jsonWhere !== "object") {
+      jsonWhere = {};
+    }
     if (this.db instanceof MongoDAO) {
-      return this.db.select(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort);
+      return this.db.select(
+        tableName,
+        modelWhere2Mongo(jsonWhere),
+        jsonFields,
+        jsonSort
+      );
     } else if (this.db !== null) {
       return this.db.select(
         this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort)
@@ -370,32 +424,53 @@ class NodeDatabase {
 
   /**
    * truy vấn tất cả bảng ghi
-   * select ...jsonFields from ...tableName 
-   * where ...jsonWhere 
-   * order by ...jsonSort 
+   * select ...jsonFields from ...tableName
+   * where ...jsonWhere
+   * order by ...jsonSort
    * limit ... offset ...jsonPaging
-   * @param {*} tableName 
+   * @param {*} tableName
    * @param {*} jsonWhere {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    * @param {*} jsonFields {field_name_i:1 | 0,...} = liệt kê các trường cần lấy
    * @param {*} jsonSort {field_name: 1 | -1} = sắp xếp theo từ thấp đến cao =1 hoặc từ cao xuống thấp =-1
    * @param {*} jsonPaging {limit: x, offset: y} trong đó x là số lượng bảng ghi trả về, y là bắt đầu lấy từ bản ghi thứ y
    */
-  selectAll(tableName, jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
+  selectAll(
+    tableName,
+    jsonWhere = {},
+    jsonFields = {},
+    jsonSort = {},
+    jsonPaging = {}
+  ) {
     if (this.db instanceof MongoDAO) {
-      return this.db.selectAll(tableName, modelWhere2Mongo(jsonWhere), jsonFields, jsonSort, { ...jsonPaging, skip: jsonPaging.offset });
+      return this.db.selectAll(
+        tableName,
+        modelWhere2Mongo(jsonWhere),
+        jsonFields,
+        jsonSort,
+        { ...jsonPaging, skip: jsonPaging.offset }
+      );
     } else if (this.db !== null) {
       return this.db.selectAll(
-        this.convertSelectFromMongo(tableName, jsonWhere, jsonFields, jsonSort, jsonPaging)
+        this.convertSelectFromMongo(
+          tableName,
+          jsonWhere,
+          jsonFields,
+          jsonSort,
+          jsonPaging
+        )
       );
     } else return this.errorPromise("Lỗi truy vấn dữ liệu");
   }
 
   /**
    * Truy vấn đếm số lượng bảng ghi để phân trang select
-   * @param {*} tableName 
+   * @param {*} tableName
    * @param {*} jsonWhere {field_name: value | {$<operatorname>:value} trong đó operatorname gồm: lt,lte, gt, gte, ne, null, like, exist, in, nin
    */
   selectCount(tableName, jsonWhere = {}) {
+    if (!jsonWhere || typeof jsonWhere !== "object") {
+      jsonWhere = {};
+    }
     if (this.db instanceof MongoDAO) {
       return this.db.selectCount(tableName, modelWhere2Mongo(jsonWhere));
     } else if (this.db !== null) {
@@ -406,7 +481,10 @@ class NodeDatabase {
         if (value != undefined && value != null) {
           // ver 4.0 bổ sung mệnh đề in trong where
           if (Array.isArray(value)) {
-            sqlWheres = i++ === 0 ? ` WHERE ${key} IN ('${value.join("','")}')` : ` AND ${key} IN ('${value.join("','")}')`;
+            sqlWheres =
+              i++ === 0
+                ? ` WHERE ${key} IN ('${value.join("','")}')`
+                : ` AND ${key} IN ('${value.join("','")}')`;
           } else if (typeof value === "object") {
             // ver 4.5 bổ sung thêm các mệnh đề where $lt, $gt, $in như mongodb
             let { iOut, whereS } = mongoWhere2Sql(key, value, i);
@@ -414,14 +492,16 @@ class NodeDatabase {
             sqlWheres += whereS;
             // console.log("--->", iOut, whereS);
           } else {
-            sqlWheres = i++ === 0 ? ` where ${key}='${value}'` : ` and ${key}='${value}'`;
+            sqlWheres =
+              i++ === 0 ? ` where ${key}='${value}'` : ` and ${key}='${value}'`;
           }
         }
       }
-      return this.db.getRst(`select count(*) as cnt_ from ${tableName}${sqlWheres}`)
-        .then(rst => {
+      return this.db
+        .getRst(`select count(*) as cnt_ from ${tableName}${sqlWheres}`)
+        .then((rst) => {
           return rst.cnt_;
-        })
+        });
     } else return Promise.reject("Không có dữ liệu để truy vấn");
   }
 
@@ -443,7 +523,13 @@ class NodeDatabase {
     jsonSort = {},
     jsonPaging = {}
   ) {
-    let jsonDao = { name: tablename, cols: [], wheres: [], orderbys: [], limitOffset: jsonPaging };
+    let jsonDao = {
+      name: tablename,
+      cols: [],
+      wheres: [],
+      orderbys: [],
+      limitOffset: jsonPaging,
+    };
 
     if (jsonFields)
       for (let key in jsonFields)
@@ -502,25 +588,34 @@ class NodeDatabase {
       let el = jsonStructure[key];
       if (el && el.type) {
         // gán mệnh đề foreign_key nếu tồn tại ít nhất một mệnh đề cuối cùng lấy được
-        orm_foreign_key = el.foreignKey || el.orm_foreign_key || orm_foreign_key;
-        // 
+        orm_foreign_key =
+          el.foreignKey || el.orm_foreign_key || orm_foreign_key;
+        //
         let opts = `${
           // nếu csdl nào không hổ trợ thì tắt nó đi và sử dụng mô hình model để tạo id tự động
           !el.autoIncrement || !this.cfg.auto_increment_support
             ? ``
             : this.db instanceof SQLiteDAO
-              ? ` ${el.primaryKey ? `PRIMARY KEY` : ``} AUTOINCREMENT`
-              : this.db instanceof OracleDAO
-                ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
-                : ``}${el.notNull ? ` NOT NULL` : ``}${el.defaultValue ? ` default ${el.defaultValue}` : ``}${el.primaryKey && this.db instanceof OracleDAO ? ` PRIMARY KEY` : ``}${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}`;
+            ? ` ${el.primaryKey ? `PRIMARY KEY` : ``} AUTOINCREMENT`
+            : this.db instanceof OracleDAO
+            ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
+            : ``
+        }${el.notNull ? ` NOT NULL` : ``}${
+          el.defaultValue ? ` default ${el.defaultValue}` : ``
+        }${
+          el.primaryKey && this.db instanceof OracleDAO ? ` PRIMARY KEY` : ``
+        }${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}`;
         cols.push({ name: key, type: el.type, option_key: opts });
       } else cols.push({ name: key, type: el });
     }
-    // bổ sung mệnh đề phụ tạo foreign_key cho sqlite, vì sqlite chỉ cho phép tạo cùng mệnh đề, 
+    // bổ sung mệnh đề phụ tạo foreign_key cho sqlite, vì sqlite chỉ cho phép tạo cùng mệnh đề,
     // oracle có thể tạo ràng buộc độc lập riêng sau đó như index
     // console.log(`Mệnh đề tạo bảng theo kiểu dữ liệu cols[cols.length-1].option_key`, cols[cols.length - 1].option_key, orm_foreign_key);
-    if (orm_foreign_key && (this.db instanceof SQLiteDAO)) {
-      cols[cols.length - 1].option_key = (cols[cols.length - 1].option_key ? cols[cols.length - 1].option_key : "") + `, ${orm_foreign_key}`
+    if (orm_foreign_key && this.db instanceof SQLiteDAO) {
+      cols[cols.length - 1].option_key =
+        (cols[cols.length - 1].option_key
+          ? cols[cols.length - 1].option_key
+          : "") + `, ${orm_foreign_key}`;
     }
     // console.log(`Cols`, cols);
     return { name: tableName, cols };
@@ -531,11 +626,11 @@ class NodeDatabase {
   // Hàm lấy 1 bảng ghi qua câu lệnh sql như cũ
   getRst(sql, params = []) {
     if (this.db instanceof MongoDAO) {
-      return this.errorPromise("Sorry MongoDB not support run this script!")
+      return this.errorPromise("Sorry MongoDB not support run this script!");
     }
 
     if (this.db !== null) {
-      return this.db.getRst(sql, params)
+      return this.db.getRst(sql, params);
     }
 
     return this.errorPromise();
@@ -544,11 +639,11 @@ class NodeDatabase {
   // lệnh lấy tất cả bảng ghi qua câu lệnh sql
   getRsts(sql, params = []) {
     if (this.db instanceof MongoDAO) {
-      return this.errorPromise("Sorry MongoDB not support run this script!")
+      return this.errorPromise("Sorry MongoDB not support run this script!");
     }
 
     if (this.db !== null) {
-      return this.db.getRsts(sql, params)
+      return this.db.getRsts(sql, params);
     }
 
     return this.errorPromise();
@@ -557,25 +652,25 @@ class NodeDatabase {
   // lệnh chạy trực tiếp câu lệnh sql như create table, update, insert, delete, run function...
   runSql(sql, params = []) {
     if (this.db instanceof MongoDAO) {
-      return this.errorPromise("Sorry MongoDB NOT SUPPORT runSql script!")
+      return this.errorPromise("Sorry MongoDB NOT SUPPORT runSql script!");
     }
 
     if (this.db !== null) {
-      return this.db.runSql(sql, params)
+      return this.db.runSql(sql, params);
     }
 
     return this.errorPromise();
   }
 
-
   // lệnh chạy hàm trong oracle
   runFunction(func, params = []) {
     if (this.db instanceof OracleDAO) {
-      return this.db.executeJavaFunction(func, params)
+      return this.db.executeJavaFunction(func, params);
     }
-    return this.errorPromise("Sorry this Database session NOT SUPPORT for runFunction");
+    return this.errorPromise(
+      "Sorry this Database session NOT SUPPORT for runFunction"
+    );
   }
-
 }
 
 module.exports = NodeDatabase;
