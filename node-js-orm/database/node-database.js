@@ -385,14 +385,14 @@ class NodeDatabase {
   deleteAll(tableName, jsonWhere = {}, jsonOption = {}) {
     if (this.db instanceof MongoDAO) {
       // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
-      return this.db.deleteALL(
+      return this.db.deleteAll(
         tableName,
         modelWhere2Mongo(jsonWhere),
         jsonOption
       );
     } else if (this.db !== null) {
       // với dữ liệu sql thì sử dụng mệnh đề where đúng không xóa 1 bảng ghi
-      return this.db.deleteALL(this.convertDaoFromMongo(tableName, jsonWhere));
+      return this.db.deleteAll(this.convertDaoFromMongo(tableName, jsonWhere));
     } else return this.errorPromise();
   }
 
