@@ -1,3 +1,5 @@
+ver 3.1.4 fix loop for updateAll and deleteAll in dynamic-model.js
+
 ver 3.1.3 fix where for update, select in database
 
 ver 3.1.2 fix update and delete in SQLITE3 with rowid 

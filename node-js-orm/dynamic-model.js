@@ -254,15 +254,6 @@ class DynamicModel extends Model {
   }
 
   /**
-   * Cập nhập tất cả các bảng ghi theo mệnh đề where
-   * @param {*} jsonData
-   * @param {*} jsonWhere
-   */
-  updateAll(jsonData, jsonWhere) {
-    return this.updateAll(jsonData, jsonWhere);
-  }
-
-  /**
    * Xóa 1 bản ghi đầu tiên tìm thấy được
    * @param {*} jsonWhere
    */
@@ -270,14 +261,7 @@ class DynamicModel extends Model {
     return this.delete(jsonWhere);
   }
 
-  /**
-   * Xóa tất cả các bảng ghi tìm thấy theo mệnh đề where
-   * @param {*} jsonWhere
-   */
-  deleteAll(jsonWhere) {
-    return this.deleteAll(jsonWhere);
-  }
-
+ 
   /**
    * Một mô hình đã định nghĩa, một mảng dữ liệu đầu vào cần đưa vào csdl
    * @param {*} arrJson

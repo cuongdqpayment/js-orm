@@ -1,6 +1,6 @@
 {
   "name": "node-js-orm",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "description": "Library for model of database and javascript",
   "repository": "https://github.com/cuongdqpayment/js-orm.git",
   "main": "index.js",
