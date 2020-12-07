@@ -50,12 +50,16 @@ class DataType {
         // kiểu số mà đưa vào chuỗi không đổi được số thì đưa ra lỗi
         (this.types.js === "number" && isNaN(value)) ||
         // kiểu chuỗi mà đưa vào không phải số cũng không phải chuỗi và không phải là giá trị null
-        (this.types.js === "string" && typeof value !== "number" && value !== null) ||
+        (this.types.js === "string" &&
+          typeof value !== "number" &&
+          value !== null) ||
         // kiểu js là boolean, kiểu dữ liệu đưa vào là không phải là số và cũng không phải là chuỗi -
         (this.types.js === "boolean" &&
           typeof value !== "number" &&
-          typeof value !== "string"))
-        //&& isNaN(value) // không phải là chuỗi chứa số hoặc cũng như không chuyển đổi được sang số
+          typeof value !== "string" &&
+          value !== null && // giá trị là null
+          value !== undefined)) // hoặc undifined chính là false
+      //&& isNaN(value) // không phải là chuỗi chứa số hoặc cũng như không chuyển đổi được sang số
     ) {
       // console.log("*** VALIDATE ERROR:", this.types.js, typeof value, this.types.js === "boolean" && typeof value !== "number" && isNaN(value));
       // console.log("*** VALIDATE ERROR:", typeof value, this.types.js, opts, isNaN(value));

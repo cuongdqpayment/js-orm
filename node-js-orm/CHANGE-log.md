@@ -1,3 +1,5 @@
+ver 3.1.6 boolean null === false
+
 ver 3.1.5 fix deleteALL --> deleteAll
 
 ver 3.1.4 fix loop for updateAll and deleteAll in dynamic-model.js
