@@ -96,43 +96,36 @@ class NodeDatabase {
       case "oracle":
         let connectString = `(DESCRIPTION =
                                             (ADDRESS_LIST =
-                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${
-                                                  this.cfg.host || "localhost"
-                                                })(PORT = ${
-          this.cfg.port || 1521
-        }))
+                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${this.cfg.host || "localhost"
+          })(PORT = ${this.cfg.port || 1521
+          }))
                                             )
                                             (CONNECT_DATA =
                                                 (SERVER = DEDICATED)
-                                                (SERVICE_NAME = ${
-                                                  this.cfg.database
-                                                })
+                                                (SERVICE_NAME = ${this.cfg.database
+          })
                                             )
                                     )`;
         if (this.cfg.hosts && this.cfg.hosts.length > 1) {
           let hostString = "";
           for (let h of this.cfg.hosts)
             if (h)
-              hostString += `(ADDRESS=(PROTOCOL=TCP)(HOST=${h.host})(PORT=${
-                h.port || 1521
-              }))`;
+              hostString += `(ADDRESS=(PROTOCOL=TCP)(HOST=${h.host})(PORT=${h.port || 1521
+                }))`;
           connectString = `(DESCRIPTION=(LOAD_BALANCE=on)
                                         (ADDRESS_LIST= ${hostString})
                                         (CONNECT_DATA=(SERVICE_NAME=${this.cfg.database})))`;
         } else if (this.cfg.hosts && this.cfg.hosts.length === 1) {
           connectString = `(DESCRIPTION =
                                             (ADDRESS_LIST =
-                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${
-                                                  this.cfg.hosts[0].host
-                                                })(PORT = ${
-            this.cfg.hosts[0].port || 1521
-          }))
+                                                (ADDRESS = (PROTOCOL = TCP)(HOST = ${this.cfg.hosts[0].host
+            })(PORT = ${this.cfg.hosts[0].port || 1521
+            }))
                                             )
                                             (CONNECT_DATA =
                                                 (SERVER = DEDICATED)
-                                                (SERVICE_NAME = ${
-                                                  this.cfg.database
-                                                })
+                                                (SERVICE_NAME = ${this.cfg.database
+            })
                                             )
                                     )`;
         }
@@ -152,9 +145,8 @@ class NodeDatabase {
         );
         break;
       case "mongodb":
-        let hostString = `${this.cfg.host || "localhost"}:${
-          this.cfg.port || 27017
-        }`;
+        let hostString = `${this.cfg.host || "localhost"}:${this.cfg.port || 27017
+          }`;
         if (this.cfg.hosts) {
           hostString = "";
           for (let ht of this.cfg.hosts) {
@@ -310,9 +302,10 @@ class NodeDatabase {
       typeof jsonWhere !== "object" ||
       !Object.keys(jsonWhere).length
     ) {
-      Promise.reject(
+      return Promise.reject(
         "YOU WAS MISSED WHERE CLAUSE such as jsonWhere = {fieldName:fieldValue}"
       );
+      // không cho thực hiện tiếp --- fix 2020-12-12
     }
     if (this.db instanceof MongoDAO) {
       // với mongo, nó cho phép chỉ update 1 bảng ghi đầu tiên thỏa điểu kiện where
@@ -362,9 +355,10 @@ class NodeDatabase {
       typeof jsonWhere !== "object" ||
       !Object.keys(jsonWhere).length
     ) {
-      Promise.reject(
+      return Promise.reject(
         "YOU WAS MISSED WHERE CLAUSE such as jsonWhere = {fieldName:fieldValue}"
       );
+      // không cho thực hiện tiếp --- fix 2020-12-12
     }
     if (this.db instanceof MongoDAO) {
       // với mongo có 2 mệnh đề, 1 là xóa 1 bảng ghi, 2 là xóa tất cả theo where
@@ -596,15 +590,13 @@ class NodeDatabase {
           !el.autoIncrement || !this.cfg.auto_increment_support
             ? ``
             : this.db instanceof SQLiteDAO
-            ? ` ${el.primaryKey ? `PRIMARY KEY` : ``} AUTOINCREMENT`
-            : this.db instanceof OracleDAO
-            ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
-            : ``
-        }${el.notNull ? ` NOT NULL` : ``}${
-          el.defaultValue ? ` default ${el.defaultValue}` : ``
-        }${
-          el.primaryKey && this.db instanceof OracleDAO ? ` PRIMARY KEY` : ``
-        }${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}`;
+              ? ` ${el.primaryKey ? `PRIMARY KEY` : ``} AUTOINCREMENT`
+              : this.db instanceof OracleDAO
+                ? ` GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)`
+                : ``
+          }${el.notNull ? ` NOT NULL` : ``}${el.defaultValue ? ` default ${el.defaultValue}` : ``
+          }${el.primaryKey && this.db instanceof OracleDAO ? ` PRIMARY KEY` : ``
+          }${!el.primaryKey && el.isUnique ? ` UNIQUE` : ``}`;
         cols.push({ name: key, type: el.type, option_key: opts });
       } else cols.push({ name: key, type: el });
     }

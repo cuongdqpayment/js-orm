@@ -1,3 +1,5 @@
+ver 3.1.8 fix Where in update and delete miss return Reject
+
 ver 3.1.7 boolean " " === false
 
 ver 3.1.6 boolean null === false
