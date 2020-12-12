@@ -25,13 +25,14 @@ class BOOLEAN extends DataType {
     return !value
       ? 0
       : (typeof value === "string" &&
-          (value.toLocaleLowerCase() === "false" ||
-            value.toLocaleLowerCase() === "off")) ||
+        !value.replace(/\s/g, "") && // trường hợp giá trị trống ở trước nhập vào thì trả về false nhé fix
+        (value.toLocaleLowerCase() === "false" ||
+          value.toLocaleLowerCase() === "off")) ||
         parseInt(value) <= 0
-      ? 0
-      : typeof value === "number" && value <= 0
-      ? 0
-      : 1;
+        ? 0
+        : typeof value === "number" && value <= 0
+          ? 0
+          : 1;
   }
 }
 module.exports = new BOOLEAN();

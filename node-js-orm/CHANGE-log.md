@@ -1,3 +1,5 @@
+ver 3.1.7 boolean " " === false
+
 ver 3.1.6 boolean null === false
 
 ver 3.1.5 fix deleteALL --> deleteAll
