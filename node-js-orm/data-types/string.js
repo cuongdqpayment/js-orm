@@ -12,5 +12,55 @@ class STRING extends DataType {
             mongodb: DataType.mapType().STRING[3]
         })
     }
+
+    /**
+     * Chuyển đổi dữ liệu sang string nếu nó là dạng object hoặc dạng số
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueData(value, dbType) {
+        if (value === undefined || value === null) return undefined;
+        
+        if (typeof value === "object") {
+            return JSON.stringify(value);
+        }
+
+        if (typeof value === "number") {
+            return "" + value;
+        }
+
+        if (typeof value !== "string") {
+            return undefined;
+        }
+
+        return value;
+    }
+
+
+    /**
+     * Mệnh đề where
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueDataWhere(value, dbType) {
+
+        if (value === undefined || value === null) return undefined;
+
+        // nếu là mệnh đề where:{id:{$like:...}}  thì trả về nguyên gốc
+        if (typeof value === "object") {
+            return value;
+        }
+
+        if (typeof value === "number") {
+            return "" + value;
+        }
+
+        if (typeof value !== "string") {
+            return undefined;
+        }
+        
+        return value;
+    }
+
 }
 module.exports = new STRING()

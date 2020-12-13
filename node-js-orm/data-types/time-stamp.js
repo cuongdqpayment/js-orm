@@ -23,10 +23,63 @@ class TIMESTAMP extends DataType {
     * @param {*} dbType 
     */
     getTrueData(value, dbType) {
-        let customeDate = new Date(value);
-        if (dbType === DataType.mapType().dbTypes[0]) return customeDate
+        // nếu là null hoặc undefined hoặc 0 hoặc "" thì trả về undefined
+        if (!value) return undefined;
+
+        let customeDate;
+
+        if (typeof value === "string" || typeof value === "number") {
+            // loại string thì phải chuyển đổi ngày tháng năm cho hợp lệ để tạo ngày chính xác
+            // các dạng hợp lệ để khởi tạo ngày là yyyy-mm-dd hoặc yyyy/mm/dd
+            // nếu trong chuỗi có 
+            // loại này là số thì dạng đó là dạng milisecond nên tạo lại ngày chính xác
+            customeDate = new Date(value);
+        }
+
+        if (!customeDate || isNaN(customeDate.getTime())) return undefined;
+
+        if (dbType === DataType.mapType().dbTypes[0]) return customeDate;
+
         if (dbType === DataType.mapType().dbTypes[1]) return customeDate.getTime();
+
         return customeDate.getTime();
+
+    }
+
+
+    /**
+     * Mệnh đề where
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueDataWhere(value, dbType) {
+        
+        // nếu là null hoặc undefined hoặc 0 hoặc "" thì trả về undefined
+        if (!value) return undefined;
+
+        // nếu là mệnh đề where:{id:{$like:...}}  thì trả về nguyên gốc
+        if (typeof value === "object") {
+            return value;
+        }
+
+        let customeDate;
+
+        if (typeof value === "string" || typeof value === "number") {
+            // loại string thì phải chuyển đổi ngày tháng năm cho hợp lệ để tạo ngày chính xác
+            // các dạng hợp lệ để khởi tạo ngày là yyyy-mm-dd hoặc yyyy/mm/dd
+            // nếu trong chuỗi có 
+            // loại này là số thì dạng đó là dạng milisecond nên tạo lại ngày chính xác
+            customeDate = new Date(value);
+        }
+
+        if (!customeDate || isNaN(customeDate.getTime())) return undefined;
+
+        if (dbType === DataType.mapType().dbTypes[0]) return customeDate;
+
+        if (dbType === DataType.mapType().dbTypes[1]) return customeDate.getTime();
+
+        return customeDate.getTime();
+
     }
 }
 module.exports = new TIMESTAMP()

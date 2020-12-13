@@ -22,17 +22,71 @@ class BOOLEAN extends DataType {
    * @param {*} dbType
    */
   getTrueData(value, dbType) {
-    return !value
-      ? 0
-      : (typeof value === "string" &&
-        !value.replace(/\s/g, "") && // trường hợp giá trị trống ở trước nhập vào thì trả về false nhé fix
-        (value.toLocaleLowerCase() === "false" ||
-          value.toLocaleLowerCase() === "off")) ||
-        parseInt(value) <= 0
-        ? 0
-        : typeof value === "number" && value <= 0
-          ? 0
-          : 1;
+    // nếu không định nghĩa thì trả về không định nghĩa
+    if (value === undefined || value === null) return undefined;
+
+    // nếu không có giá trị thì trả về false = 0
+    if (!value) return 0;
+
+    if (typeof value === "string") {
+      if (!value.replace(/\s/g, "")) {
+        return 0;
+      }
+      if (value.replace(/\s/g, "").toLocaleLowerCase() === "false" ||
+        value.replace(/\s/g, "").toLocaleLowerCase() === "off") {
+        return 0;
+      }
+      if (parseInt(value) <= 0) {
+        return 0;
+      }
+    }
+
+    if (typeof value === "number" && value <= 0) {
+      return 0;
+    }
+
+    return 1;
+
   }
+
+
+  /**
+   * 
+   * @param {*} value 
+   * @param {*} dbType 
+   */
+  getTrueDataWhere(value, dbType) {
+    // nếu không định nghĩa thì trả về không định nghĩa
+    if (value === undefined || value === null) return undefined;
+
+    // nếu là mệnh đề where:{id:{$like:...}}  thì trả về nguyên gốc
+    if (typeof value === "object") {
+      return value;
+    }
+
+    // nếu không có giá trị thì trả về false = 0
+    if (!value) return 0;
+
+    if (typeof value === "string") {
+      if (!value.replace(/\s/g, "")) {
+        return 0;
+      }
+      if (value.replace(/\s/g, "").toLocaleLowerCase() === "false" ||
+        value.replace(/\s/g, "").toLocaleLowerCase() === "off") {
+        return 0;
+      }
+      if (parseInt(value) <= 0) {
+        return 0;
+      }
+    }
+
+    if (typeof value === "number" && value <= 0) {
+      return 0;
+    }
+
+    return 1;
+
+  }
+  
 }
 module.exports = new BOOLEAN();

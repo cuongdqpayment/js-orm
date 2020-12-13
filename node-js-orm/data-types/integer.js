@@ -17,7 +17,51 @@ class INTEGER extends DataType {
      * @param {*} dbType 
      */
     getTrueData(value, dbType) {
-        return isNaN(parseInt(value)) ? undefined : parseInt(value) 
+        if (value === undefined
+            || value === null
+            ||
+            (typeof value !== "string" && typeof value !== "number")
+        ) return undefined;
+
+        if (typeof value === "number") {
+            return value;
+        }
+
+        if (typeof value === "string") {
+            return isNaN(parseInt(value)) ? undefined : parseInt(value);
+        }
+
+        return undefined;
+
+    }
+
+    /**
+     * Chuyển đổi mệnh đề where
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueDataWhere(value, dbType) {
+
+        if (value === undefined
+            || value === null
+        ) return undefined;
+
+        // nếu là mệnh đề where:{id:{$like:...}}  thì trả về nguyên gốc
+        if (typeof value === "object") {
+            return value;
+        }
+        
+        if (typeof value === "number") {
+            return value;
+        }
+
+
+        if (typeof value === "string") {
+            return isNaN(parseInt(value)) ? undefined : parseInt(value);
+        }
+
+        return undefined;
+
     }
 }
 module.exports = new INTEGER()

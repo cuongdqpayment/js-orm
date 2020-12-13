@@ -22,19 +22,71 @@ class DATETIME extends DataType {
     * @param {*} dbType 
     */
     getTrueData(value, dbType) {
-        
-        if (!value) {
-            return undefined;
+        // nếu là null hoặc undefined hoặc 0 hoặc "" thì trả về undefined
+        if (!value) return undefined;
+
+        let customeDate;
+
+        if (typeof value === "string" || typeof value === "number") {
+            // loại string thì phải chuyển đổi ngày tháng năm cho hợp lệ để tạo ngày chính xác
+            // các dạng hợp lệ để khởi tạo ngày là yyyy-mm-dd hoặc yyyy/mm/dd
+            // nếu trong chuỗi có 
+            // loại này là số thì dạng đó là dạng milisecond nên tạo lại ngày chính xác
+            customeDate = new Date(value);
         }
 
-        let customeDate = new Date(value);
+        if (!customeDate || isNaN(customeDate.getTime())) return undefined;
+
+        // kiểm tra theo kiểu csdl để trả về biến đổi hàm quy ước
         if (dbType === DataType.mapType().dbTypes[0]) return customeDate
-        let yyyy_mm_dd = ("" + customeDate.getFullYear()).padStart(4, 0) + "-" + ("" + (customeDate.getMonth() + 1)).padStart(2, 0) + "-" + ("" + customeDate.getDate()).padStart(2, 0)
-        let hh_mi_ss = ("" + customeDate.getHours()).padStart(2, 0) + ":" + ("" + customeDate.getMinutes()).padStart(2, 0) + ":" + ("" + customeDate.getSeconds()).padStart(2, 0)
+        let yyyy_mm_dd = ("" + customeDate.getFullYear()).padStart(4, 0) + "-" + ("" + (customeDate.getMonth() + 1)).padStart(2, 0) + "-" + ("" + customeDate.getDate()).padStart(2, 0);
+        let hh_mi_ss = ("" + customeDate.getHours()).padStart(2, 0) + ":" + ("" + customeDate.getMinutes()).padStart(2, 0) + ":" + ("" + customeDate.getSeconds()).padStart(2, 0);
         if (dbType === DataType.mapType().dbTypes[1]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
-        if (dbType === DataType.mapType().dbTypes[2]) return `__$to_date('${yyyy_mm_dd} ${hh_mi_ss}','yyyy-mm-dd hh24:mi:ss')`
+        if (dbType === DataType.mapType().dbTypes[2]) return `__$to_date('${yyyy_mm_dd} ${hh_mi_ss}','yyyy-mm-dd hh24:mi:ss')`;
         if (dbType === DataType.mapType().dbTypes[3]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
-        return `${yyyy_mm_dd} ${hh_mi_ss}`
+
+        // nếu không thuộc các dạng trên thì trả về không định nghĩa
+        return undefined;
+
+    }
+
+    /**
+     * 
+     * @param {*} value 
+     * @param {*} dbType 
+     */
+    getTrueDataWhere(value, dbType) {
+        // nếu là null hoặc undefined hoặc 0 hoặc "" thì trả về undefined
+        if (!value) return undefined;
+
+        // nếu là mệnh đề where:{id:{$like:...}}  thì trả về nguyên gốc
+        if (typeof value === "object") {
+            return value;
+        }
+
+        let customeDate;
+
+        if (typeof value === "string" || typeof value === "number") {
+            // loại string thì phải chuyển đổi ngày tháng năm cho hợp lệ để tạo ngày chính xác
+            // các dạng hợp lệ để khởi tạo ngày là yyyy-mm-dd hoặc yyyy/mm/dd
+            // nếu trong chuỗi có 
+            // loại này là số thì dạng đó là dạng milisecond nên tạo lại ngày chính xác
+            customeDate = new Date(value);
+        }
+
+        if (!customeDate || isNaN(customeDate.getTime())) return undefined;
+
+        // kiểm tra theo kiểu csdl để trả về biến đổi hàm quy ước
+        if (dbType === DataType.mapType().dbTypes[0]) return customeDate
+        let yyyy_mm_dd = ("" + customeDate.getFullYear()).padStart(4, 0) + "-" + ("" + (customeDate.getMonth() + 1)).padStart(2, 0) + "-" + ("" + customeDate.getDate()).padStart(2, 0);
+        let hh_mi_ss = ("" + customeDate.getHours()).padStart(2, 0) + ":" + ("" + customeDate.getMinutes()).padStart(2, 0) + ":" + ("" + customeDate.getSeconds()).padStart(2, 0);
+        if (dbType === DataType.mapType().dbTypes[1]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
+        if (dbType === DataType.mapType().dbTypes[2]) return `__$to_date('${yyyy_mm_dd} ${hh_mi_ss}','yyyy-mm-dd hh24:mi:ss')`;
+        if (dbType === DataType.mapType().dbTypes[3]) return `${yyyy_mm_dd} ${hh_mi_ss}`;
+
+        // nếu không thuộc các dạng trên thì trả về không định nghĩa
+        return undefined;
+
     }
 }
 module.exports = new DATETIME()

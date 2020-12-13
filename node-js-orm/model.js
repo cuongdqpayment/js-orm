@@ -173,7 +173,8 @@ class Model {
       let jsonDaoDataAutoIncrement = await this.checkAutoIncrement(jsonFilter);
       let jsonDaoData = this.convertTrueData(jsonDaoDataAutoIncrement);
       // kiểm tra nếu lỗi thì trả về mã lỗi và câu sql gốc
-      return this.db.insertOne(this.tableName, jsonDaoData).catch((error) => {
+      return this.db.insertOne(this.tableName, jsonDaoData)
+      .catch((error) => {
         throw {
           data: jsonData,
           error,
@@ -191,7 +192,13 @@ class Model {
    * @param {*} jsonSort
    */
   read(jsonWhere = {}, jsonFields = {}, jsonSort = {}) {
-    return this.db.selectOne(this.tableName, jsonWhere, jsonFields, jsonSort);
+    // let jsonWhereTrueData = this.convertTrueData(jsonWhere);
+    return this.db.selectOne(
+      this.tableName,
+      this.convertTrueDataWhere(jsonWhere),
+      jsonFields,
+      jsonSort
+    );
   }
 
   /**
@@ -204,7 +211,7 @@ class Model {
   readAll(jsonWhere = {}, jsonFields = {}, jsonSort = {}, jsonPaging = {}) {
     return this.db.selectAll(
       this.tableName,
-      jsonWhere,
+      this.convertTrueDataWhere(jsonWhere),
       jsonFields,
       jsonSort,
       jsonPaging
@@ -216,7 +223,10 @@ class Model {
    * @param {*} jsonWhere
    */
   readCount(jsonWhere = {}) {
-    return this.db.selectCount(this.tableName, jsonWhere);
+    return this.db.selectCount(
+      this.tableName,
+      this.convertTrueDataWhere(jsonWhere)
+    );
   }
 
   /**
@@ -250,10 +260,15 @@ class Model {
       });
     }
     return this.db
-      .selectAll(this.tableName, jsonWhere, jsonFields, jsonSort, {
-        limit,
-        offset,
-      })
+      .selectAll(
+        this.tableName,
+        this.convertTrueDataWhere(jsonWhere),
+        jsonFields,
+        jsonSort,
+        {
+          limit,
+          offset,
+        })
       .then((data) => {
         return {
           page,
@@ -275,7 +290,10 @@ class Model {
         ? this.validFilter(jsonData)
         : jsonData;
       return this.db
-        .updateOne(this.tableName, jsonFilter, jsonWhere)
+        .updateOne(this.tableName,
+          jsonFilter,
+          this.convertTrueDataWhere(jsonWhere)
+        )
         .catch((error) => {
           throw {
             data: jsonData,
@@ -294,11 +312,17 @@ class Model {
    */
   updateAll(jsonData, jsonWhere) {
     try {
+
       let jsonFilter = this.tableStructure
         ? this.validFilter(jsonData)
         : jsonData;
+
       return this.db
-        .updateAll(this.tableName, jsonFilter, jsonWhere)
+        .updateAll(
+          this.tableName,
+          jsonFilter,
+          this.convertTrueDataWhere(jsonWhere)
+        )
         .catch((error) => {
           throw {
             data: jsonData,
@@ -316,7 +340,10 @@ class Model {
    * @param {*} jsonOption
    */
   delete(jsonWhere, jsonOption) {
-    return this.db.deleteOne(this.tableName, jsonWhere, jsonOption);
+    return this.db.deleteOne(
+      this.tableName,
+      this.convertTrueDataWhere(jsonWhere),
+      jsonOption);
   }
 
   /**
@@ -325,7 +352,10 @@ class Model {
    * @param {*} jsonOption
    */
   deleteAll(jsonWhere, jsonOption) {
-    return this.db.deleteAll(this.tableName, jsonWhere, jsonOption);
+    return this.db.deleteAll(
+      this.tableName,
+      this.convertTrueDataWhere(jsonWhere),
+      jsonOption);
   }
 
   /**
@@ -347,12 +377,7 @@ class Model {
         // trả về là max hoặc undefined
         let maxId = await this.db.getMaxIncrement(this.tableName, key);
         if (maxId >= 0) {
-          Object.defineProperty(filter, key, {
-            value: maxId + 1,
-            writable: true,
-            enumerable: true,
-            configurable: true,
-          });
+          filter[key] = maxId + 1;
         }
       }
     }
@@ -371,19 +396,10 @@ class Model {
         let newType = this.changeDbType(el.type, el.length);
         let newEl = { ...el };
         newEl.type = newType;
-        Object.defineProperty(newConstructure, key, {
-          value: newEl,
-          writable: true,
-          enumerable: true,
-          configurable: true,
-        });
-      } else
-        Object.defineProperty(newConstructure, key, {
-          value: this.changeDbType(el),
-          writable: true,
-          enumerable: true,
-          configurable: true,
-        });
+        newConstructure[key] = newEl;
+      } else {
+        newConstructure[key] = this.changeDbType(el);
+      }
     }
     return newConstructure;
   }
@@ -409,13 +425,28 @@ class Model {
           el && el.type
             ? this.getTrueData(value, el.type)
             : this.getTrueData(value, el);
+        filter[key] = trueData;
+      }
+    }
+    return filter;
+  }
 
-        Object.defineProperty(filter, key, {
-          value: trueData,
-          writable: true,
-          enumerable: true,
-          configurable: true,
-        });
+  /**
+   * Chuyển đổi kiểu dữ liệu thực cho mô hình để select, update, delete đúng mệnh đề where;
+   * @param {*} jsonWhere 
+   */
+  convertTrueDataWhere(jsonWhere) {
+    if (!this.tableStructure) return jsonWhere;
+    let filter = {};
+    for (let key in this.tableStructure) {
+      let el = this.tableStructure[key];
+      let value = jsonWhere[key];
+      if (value !== undefined) {
+        let trueData =
+          el && el.type
+            ? this.getTrueDataWhere(value, el.type)
+            : this.getTrueDataWhere(value, el);
+        filter[key] = trueData;
       }
     }
     return filter;
@@ -436,6 +467,18 @@ class Model {
       : value;
   }
 
+
+  /**
+   * 
+   * @param {*} value 
+   * @param {*} type 
+   */
+  getTrueDataWhere(value, type) {
+    return type && type.getTrueDataWhere
+      ? type.getTrueDataWhere(value, this.dbType)
+      : value;
+  }
+
   // kiểm tra tính hợp lệ của dữ liệu
   // và chỉ lọc trả về các trường theo định nghĩa trước thôi
   validFilter(jsonData) {
@@ -448,14 +491,10 @@ class Model {
         if (value !== undefined) {
           if (el && el.type) {
             this.checkValid(value, el.type, el);
-          } else this.checkValid(value, el);
-          // chỉ lọc những trường có giá trị được định nghĩa kể cả null
-          Object.defineProperty(filter, key, {
-            value: value,
-            writable: true,
-            enumerable: true,
-            configurable: true,
-          });
+          } else {
+            this.checkValid(value, el);
+          }
+          filter[key] = value;
         }
       } catch (e) {
         throw `ERR-model: Field ${key} error with ${e}`;
@@ -482,8 +521,9 @@ class Model {
 
   // hàm trả về lỗi promise cho các thực thi bị sai
   errorPromise(e) {
-    return new Promise((rs, rj) => rj(e || "Error with no db available!"));
+    return Promise.reject(e || "Error with no db available!");
   }
+
 }
 
 module.exports = Model;

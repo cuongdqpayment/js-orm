@@ -1,3 +1,5 @@
+ver 3.1.9 fix Where for data_type true data 
+
 ver 3.1.8 fix Where in update and delete miss return Reject
 
 ver 3.1.7 boolean " " === false
